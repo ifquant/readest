@@ -98,21 +98,31 @@ fn get_files_from_argv(argv: Vec<String>) -> Vec<PathBuf> {
     files
 }
 
+// Injects file paths into the webview's JavaScript context for "Open With" functionality
+// This allows the frontend to know which files were opened via command line or drag-and-drop
 #[cfg(desktop)]
 fn set_window_open_with_files(app: &AppHandle, files: Vec<PathBuf>) {
+    // Convert file paths to properly escaped JavaScript string array format:
+    // 1. Convert PathBuf to string representation
+    // 2. Escape backslashes (Windows paths) and quotes for JS string literals
+    // 3. Wrap each path in quotes and join with commas
     let files = files
         .into_iter()
         .map(|f| {
             let file = f
                 .to_string_lossy()
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"");
-            format!("\"{file}\"",)
+                .replace("\\", "\\\\")  // Escape backslashes: \ -> \\
+                .replace("\"", "\\\""); // Escape quotes: " -> \"
+            format!("\"{file}\"",)  // Wrap in quotes: path -> "path"
         })
         .collect::<Vec<_>>()
-        .join(",");
+        .join(",");  // Join into comma-separated string: "path1","path2"
+    
+    // Get the main webview window and inject JavaScript
     let window = app.get_webview_window("main").unwrap();
     let script = format!("window.OPEN_WITH_FILES = [{files}];");
+    
+    // Execute the script to set the global variable in the webview
     if let Err(e) = window.eval(&script) {
         eprintln!("Failed to set open files variable: {e}");
     }
