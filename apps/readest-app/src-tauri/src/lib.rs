@@ -8,6 +8,8 @@ extern crate cocoa;
 #[macro_use]
 extern crate objc;
 
+// Import Tauri's background throttling policy configuration
+// Controls how the app behaves when in the background on different platforms
 use tauri::utils::config::BackgroundThrottlingPolicy;
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
