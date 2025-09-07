@@ -4,13 +4,22 @@
 #[macro_use]  // Import cocoa crate macros into global scope
 extern crate cocoa;
 
+// macOS-specific Objective-C runtime bindings for low-level macOS integration
+// Provides access to macOS Foundation framework and Objective-C messaging
+// Only compiled and linked on macOS targets
 #[cfg(target_os = "macos")]
-#[macro_use]
+#[macro_use]  // Import objc crate macros into global scope
 extern crate objc;
 
 // Import Tauri's background throttling policy configuration
 // Controls how the app behaves when in the background on different platforms
 use tauri::utils::config::BackgroundThrottlingPolicy;
+// macOS-specific title bar style configuration for custom window decorations
+// Tauri's TitleBarStyle is primarily used on macOS for:
+// - Overlay title bars (translucent, modern look)
+// - Unified title bars (content extends behind title bar)
+// - Custom traffic light buttons positioning
+// Windows/Linux use different window decoration systems
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
