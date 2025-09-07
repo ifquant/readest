@@ -23,12 +23,16 @@ use tauri::utils::config::BackgroundThrottlingPolicy;
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
+// Desktop-only imports - mobile platforms have different file system and app management APIs
+// PathBuf: Standard file path handling (mobile uses content URIs and sandboxed storage)
+// Tauri app management: Desktop-specific window and process management features
+// FsExt: File system extensions that rely on desktop file system permissions
 #[cfg(desktop)]
-use std::path::PathBuf;
-#[cfg(desktop)]
-use tauri::{AppHandle, Listener, Manager, Url};
-#[cfg(desktop)]
-use tauri_plugin_fs::FsExt;
+use {
+    std::path::PathBuf,
+    tauri::{AppHandle, Listener, Manager, Url},
+    tauri_plugin_fs::FsExt,
+};
 
 #[cfg(target_os = "macos")]
 mod macos;
@@ -37,6 +41,10 @@ use tauri::{command, Emitter, WebviewUrl, WebviewWindowBuilder, Window};
 use tauri_plugin_oauth::start;
 use transfer_file::{download_file, upload_file};
 
+// Grants file access permissions in Tauri's security scopes for desktop apps
+// Required for files passed via command line or drag-and-drop to be accessible by the webview
+// fs_scope: File system access scope for direct file operations
+// asset_protocol_scope: Custom protocol scope for asset:// URLs in webview
 #[cfg(desktop)]
 fn allow_file_in_scopes(app: &AppHandle, files: Vec<PathBuf>) {
     let fs_scope = app.fs_scope();
