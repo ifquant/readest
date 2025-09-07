@@ -137,11 +137,20 @@ fn set_rounded_window(app: &AppHandle, rounded: bool) {
     }
 }
 
+// Starts a local HTTP server for OAuth 2.0 authentication flow
+// This is required to handle OAuth redirects from external providers (Google, GitHub, etc.)
+// The server listens on localhost and captures the redirect URL containing authentication tokens
 #[command]
 async fn start_server(window: Window) -> Result<u16, String> {
     start(move |url| {
-        // Because of the unprotected localhost port, you must verify the URL here.
-        // Preferebly send back only the token, or nothing at all if you can handle everything else in Rust.
+        // OAuth providers redirect to this local server after authentication
+        // The URL contains access tokens, refresh tokens, and other auth data
+        // Security note: Localhost ports are accessible to any process on the machine
+        // Should validate the URL origin and parameters to prevent malicious redirects
+        // Ideally extract only the necessary tokens instead of forwarding the entire URL
+        
+        // Forward the complete redirect URL to the frontend for processing
+        // Frontend will extract tokens and complete the authentication flow
         let _ = window.emit("redirect_uri", url);
     })
     .map_err(|err| err.to_string())
