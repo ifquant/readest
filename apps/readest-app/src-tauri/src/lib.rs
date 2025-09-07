@@ -171,8 +171,20 @@ struct Payload {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_oauth::init())
+        // Core plugins required for basic functionality
+        .plugin(tauri_plugin_process::init()) // 进程管理：启动和管理外部进程
+        // OAuth plugin must be registered early because:
+        // 1. start_server command depends on tauri_plugin_oauth::start function
+        // 2. Plugin registration order matters - handlers may depend on plugin initialization
+        .plugin(tauri_plugin_oauth::init()) // OAuth认证：处理第三方登录和授权流程
+        // Register command handlers early to ensure they're available during plugin setup
+        // Some plugins may need to call these commands during their initialization
+        // 
+        // 为什么在注册所有插件之前设置 invoke_handler？
+        // 1. 依赖关系：某些插件（如 oauth 插件）的初始化过程可能需要调用这些命令
+        // 2. 启动顺序：start_server 命令依赖于 tauri_plugin_oauth::start 函数，该函数在插件初始化时可用
+        // 3. 避免循环依赖：如果命令在插件之后注册，插件初始化时无法调用这些命令
+        // 4. 早期可用性：确保在应用启动的早期阶段就能处理前端发起的命令调用
         .invoke_handler(tauri::generate_handler![
             start_server,
             download_file,
@@ -185,14 +197,24 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             macos::traffic_light::set_traffic_lights,
         ])
-        .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_http::init())
-        .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_native_bridge::init())
-        .plugin(tauri_plugin_native_tts::init())
-        .plugin(tauri_plugin_fs::init());
+        // Additional plugins registered after command handlers
+        // These plugins don't have interdependencies with the early commands
+        .plugin(tauri_plugin_shell::init()) // Shell命令执行：运行系统shell命令和打开外部应用
+        .plugin(tauri_plugin_opener::init()) // 外部打开：使用系统默认程序打开文件或URL
+        .plugin(tauri_plugin_http::init()) // HTTP客户端：发送HTTP请求和处理网络通信
+        .plugin(tauri_plugin_os::init()) // 操作系统信息：获取系统版本、平台信息等
+        .plugin(tauri_plugin_dialog::init()) // 系统对话框：显示文件选择、消息提示等原生对话框
+        .plugin(tauri_plugin_native_bridge::init()) // 原生桥接：提供平台特定的原生功能
+                                                      // - Safari认证 (macOS)
+                                                      // - 自定义标签页认证 (Android)
+                                                      // - 系统字体获取
+                                                      // - 屏幕方向锁定
+                                                      // - 应用内购买初始化
+        .plugin(tauri_plugin_native_tts::init()) // 原生文本转语音：使用系统TTS引擎
+                                                    // - 多语言语音合成
+                                                    // - 语速、音调调节
+                                                    // - 语音暂停/恢复控制
+        .plugin(tauri_plugin_fs::init()); // 文件系统操作：读写文件、目录管理等
 
     #[cfg(desktop)]
     let builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
