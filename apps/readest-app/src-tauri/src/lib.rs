@@ -63,25 +63,35 @@ fn allow_file_in_scopes(app: &AppHandle, files: Vec<PathBuf>) {
     }
 }
 
+// Parses command line arguments to extract file paths for desktop apps
+// Handles various file path formats including file:// URLs and direct paths
 #[cfg(desktop)]
 fn get_files_from_argv(argv: Vec<String>) -> Vec<PathBuf> {
     let mut files = Vec::new();
     // NOTICE: `args` may include URL protocol (`your-app-protocol://`)
     // or arguments (`--`) if your app supports them.
     // files may also be passed as `file://path/to/file`
+    // Skip the first argument (executable path), process only file arguments
     for (_, maybe_file) in argv.iter().enumerate().skip(1) {
         // skip flags like -f or --flag
         if maybe_file.starts_with("-") {
             continue;
         }
-        // handle `file://` path urls and skip other urls
+        // Handle three different file path scenarios:
+        // 1. file:// URLs (convert to local file paths)
+        // 2. Other URLs (skip, keep as string for webview handling)
+        // 3. Regular file paths (use directly)
         if let Ok(url) = Url::parse(maybe_file) {
             if let Ok(path) = url.to_file_path() {
+                // Scenario 1: file:// URLs successfully converted to local paths
                 files.push(path);
             } else {
+                // Scenario 2: Other URLs (http://, https://, etc.) - keep as string
+                // These will be handled by webview navigation, not file operations
                 files.push(PathBuf::from(maybe_file))
             }
         } else {
+            // Scenario 3: Regular file system paths
             files.push(PathBuf::from(maybe_file))
         }
     }
