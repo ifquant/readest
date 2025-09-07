@@ -1,5 +1,7 @@
+// macOS-specific Objective-C bindings for native macOS APIs
+// Only compiled and linked on macOS targets
 #[cfg(target_os = "macos")]
-#[macro_use]
+#[macro_use]  // Import cocoa crate macros into global scope
 extern crate cocoa;
 
 #[cfg(target_os = "macos")]
