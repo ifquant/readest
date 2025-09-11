@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "apps/readest-app/src-tauri",
+  "apps/futureass/src-tauri",
   "packages/tauri/crates/tauri",
   "packages/tauri/crates/tauri-utils",
   "packages/tauri/crates/tauri-build",
