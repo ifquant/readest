@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // When using the Tauri API npm package:
 import { invoke } from '@tauri-apps/api/core';
 import { useCallback } from 'react';

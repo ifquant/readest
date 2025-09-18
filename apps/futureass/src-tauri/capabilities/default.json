@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": ["main","overlay-webview" ],
   "permissions": [
     "core:default",
     "opener:default",
@@ -10,6 +10,11 @@
     "core:webview:allow-get-all-webviews",
     "core:window:default",
     "opener:default",
-    "core:app:default"
+    "core:app:default",
+    "core:window:allow-set-size",
+    "core:window:allow-set-position",
+    "core:window:allow-inner-position",
+    "core:window:allow-show",
+    "core:webview:allow-create-webview-window"
   ]
 }
