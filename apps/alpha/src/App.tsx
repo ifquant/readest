@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import MarketPage from './MarketPage';
 import TraderPage from './TraderPage';
 import ChartPage from './ChartPage';
+import Toolbars from './Toolbars';
+import Menu from './Menu';
 import './App.css';
 
 // 定义数据接口
@@ -115,72 +117,18 @@ function App() {
 
   return (
     <div className="trading-app">
+      {/* 顶部菜单栏 */}
+      <Menu 
+        setShowLoginModal={() => setShowLoginModal(true)}
+        setShowSettingsModal={() => setShowSettingsModal(true)}
+      />
+      
       {/* 顶部工具栏 */}
-      <div className="toolbar">
-        <div className="toolbar-left">
-          <h1 className="app-title">博弈大师交易系统</h1>
-        </div>
-        
-        <div className="toolbar-center">
-          <button className="toolbar-btn">行情</button>
-          <button className="toolbar-btn">分析</button>
-          <button className="toolbar-btn">工具</button>
-          <button className="toolbar-btn">帮助</button>
-        </div>
-        
-        <div className="toolbar-right">
-          {showChartPage && (
-            <div className="timeframe-selector">
-              <button 
-                className={`timeframe-btn ${timeframe === '15m' ? 'active' : ''}`}
-                onClick={() => setTimeframe('15m')}
-              >
-                15分钟
-              </button>
-              <button 
-                className={`timeframe-btn ${timeframe === '1h' ? 'active' : ''}`}
-                onClick={() => setTimeframe('1h')}
-              >
-                1小时
-              </button>
-              <button 
-                className={`timeframe-btn ${timeframe === '4h' ? 'active' : ''}`}
-                onClick={() => setTimeframe('4h')}
-              >
-                4小时
-              </button>
-              <button 
-                className={`timeframe-btn ${timeframe === '1d' ? 'active' : ''}`}
-                onClick={() => setTimeframe('1d')}
-              >
-                1天
-              </button>
-            </div>
-          )}
-          
-          {/* 连接状态指示器 */}
-          <div className="connection-status connected">
-            <span className="status-dot"></span>
-            已连接
-          </div>
-          
-          {/* 用户登录按钮 */}
-          <button 
-            className="user-btn"
-            onClick={() => setShowLoginModal(true)}
-          >
-            用户登录
-          </button>
-          
-          {/* 设置按钮 */}
-          <button 
-            className="settings-btn"
-            onClick={() => setShowSettingsModal(true)}
-          >
-            设置
-          </button>
-        </div>
-      </div>
+      <Toolbars 
+        showChartPage={showChartPage}
+        timeframe={timeframe}
+        setTimeframe={setTimeframe}
+      />
 
       {/* 主内容区域 */}
       <div className="main-container">
@@ -509,6 +457,10 @@ function App() {
         <div className="status-left">
           <span className="status-item">服务器时间: {new Date().toLocaleTimeString()}</span>
           <span className="status-item">系统版本: v1.0.0</span>
+          <div className="connection-status connected status-item">
+            <span className="status-dot"></span>
+            已连接
+          </div>
         </div>
         <div className="status-right">
           <span className="status-item">网络延迟: 25ms</span>
