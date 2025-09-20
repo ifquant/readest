@@ -1,0 +1,266 @@
+/* QuotePage 样式 */
+.quote-page {
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 价格信息区域 */
+.price-info-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #16213e;
+  border-radius: 8px;
+}
+
+.price-info-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  color: #ffffff;
+}
+
+.current-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.current-price .price {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.current-price .change {
+  font-size: 16px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.price-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.price-item .label {
+  color: #cccccc;
+  font-size: 14px;
+}
+
+.price-item .value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.limit-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.limit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.limit-item .label {
+  color: #cccccc;
+  font-size: 14px;
+}
+
+.limit-item .value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 成交量信息 */
+.volume-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #16213e;
+  border-radius: 8px;
+}
+
+.volume-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.volume-item .label {
+  color: #cccccc;
+  font-size: 14px;
+}
+
+.volume-item .value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 买卖盘 */
+.order-book {
+  margin-bottom: 20px;
+}
+
+.order-book h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #ffffff;
+  padding: 10px 0;
+  border-bottom: 1px solid #333;
+}
+
+.asks-section,
+.bids-section {
+  margin-bottom: 15px;
+}
+
+.order-book-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 8px 5px;
+  background-color: #16213e;
+  border-radius: 4px 4px 0 0;
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+}
+
+.order-book-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 6px 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s;
+  font-size: 13px;
+}
+
+.order-book-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.col-price {
+  text-align: right;
+  font-weight: 500;
+}
+
+.col-amount {
+  text-align: right;
+}
+
+.col-total {
+  text-align: right;
+  color: #999;
+}
+
+.col-price.ask {
+  color: #e74c3c;
+}
+
+.col-price.bid {
+  color: #27ae60;
+}
+
+/* 实时成交 */
+.ticks-section {
+  margin-bottom: 20px;
+}
+
+.ticks-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #ffffff;
+  padding: 10px 0;
+  border-bottom: 1px solid #333;
+}
+
+.ticks-container {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tick-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  padding: 6px 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+}
+
+.tick-time {
+  color: #999;
+}
+
+.tick-price {
+  text-align: right;
+  font-weight: 500;
+}
+
+.tick-amount {
+  text-align: right;
+}
+
+/* 涨跌颜色 */
+.up {
+  color: #27ae60;
+}
+
+.down {
+  color: #e74c3c;
+}
+
+.flat {
+  color: #ffffff;
+}
+
+/* 滚动条样式 */
+.quote-page::-webkit-scrollbar,
+.ticks-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quote-page::-webkit-scrollbar-track,
+.ticks-container::-webkit-scrollbar-track {
+  background: #16213e;
+  border-radius: 3px;
+}
+
+.quote-page::-webkit-scrollbar-thumb,
+.ticks-container::-webkit-scrollbar-thumb {
+  background: #34495e;
+  border-radius: 3px;
+}
+
+.quote-page::-webkit-scrollbar-thumb:hover,
+.ticks-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 加载状态 */
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  margin: 50px auto;
+  border: 3px solid rgba(0, 180, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #00b4ff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
