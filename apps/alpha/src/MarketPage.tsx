@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface MarketDataItem {
   id: number;
@@ -21,6 +21,10 @@ type MarketType = 'bitcoin' | 'stockFutures' | 'domesticFutures';
 const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, selectedSymbol, marketType }) => {
   // 状态管理
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchPopup, setShowSearchPopup] = useState(false);
+  const [searchResults, setSearchResults] = useState<MarketDataItem[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   // 模拟比特币市场数据
   const bitcoinMarketData: MarketDataItem[] = [
@@ -67,6 +71,51 @@ const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, s
     item.symbol.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // 处理搜索输入变化
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    if (value.trim() !== '') {
+      setShowSearchPopup(true);
+      const results = getCurrentMarketData().filter(item => 
+        item.symbol.toLowerCase().includes(value.toLowerCase())
+      );
+      setSearchResults(results);
+    } else {
+      setShowSearchPopup(false);
+    }
+  };
+
+  // 处理搜索结果选择
+  const handleResultSelect = (symbol: string) => {
+    setSearchQuery(symbol);
+    setShowSearchPopup(false);
+    onSymbolSelect(symbol);
+  };
+
+  // 处理点击外部关闭弹窗
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node) &&
+          searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchPopup(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // 处理搜索框获取焦点时显示弹窗（如果有搜索内容）
+  const handleSearchFocus = () => {
+    if (searchQuery.trim() !== '') {
+      setShowSearchPopup(true);
+    }
+  };
+
   // 获取市场类型对应的标题
   const getMarketTitle = () => {
     switch (marketType) {
@@ -83,16 +132,66 @@ const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, s
   return (
     <div className="market-page">
       <div className="page-header">
-        <div className="search-box">
+        <div className="search-box" ref={searchRef}>
           <input 
             type="text" 
             placeholder="搜索交易对..." 
             value={searchQuery} 
-            onChange={(e) => setSearchQuery(e.target.value)} 
+            onChange={handleSearchChange}
+            onFocus={handleSearchFocus}
           />
-          <button className="search-btn">🔍</button>
+          <button 
+            className="search-btn" 
+            onClick={() => {
+              if (searchQuery.trim() !== '') {
+                setShowSearchPopup(!showSearchPopup);
+              }
+            }}
+          >
+            🔍
+          </button>
         </div>
       </div>
+
+      {/* 搜索弹窗 */}
+      {showSearchPopup && (
+        <div className="search-popup" ref={popupRef}>
+          <div className="search-popup-input-wrapper">
+            <input 
+              type="text" 
+              placeholder="继续输入..." 
+              value={searchQuery} 
+              onChange={handleSearchChange}
+              autoFocus
+            />
+            <button 
+              className="search-popup-close-btn" 
+              onClick={() => setShowSearchPopup(false)}
+            >
+              ✕
+            </button>
+          </div>
+          <div className="search-popup-results">
+            {searchResults.length > 0 ? (
+              searchResults.map(item => (
+                <div 
+                  key={item.id} 
+                  className={`search-popup-item ${selectedSymbol === item.symbol ? 'selected' : ''}`}
+                  onClick={() => handleResultSelect(item.symbol)}
+                >
+                  <div className="search-popup-symbol">{item.symbol}</div>
+                  <div className="search-popup-price">${item.price.toFixed(2)}</div>
+                  <div className={item.change >= 0 ? 'search-popup-change positive' : 'search-popup-change negative'}>
+                    {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="search-popup-no-results">没有找到匹配的交易对</div>
+            )}
+          </div>
+        </div>
+      )}
       
       <div className="current-market-title">
         <h3>{getMarketTitle()}</h3>
