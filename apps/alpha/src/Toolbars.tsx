@@ -14,8 +14,6 @@ const Toolbars: React.FC<ToolbarsProps> = ({
 }) => {
   return (
     <div className="toolbar">
-      <h1 className="app-title">博弈大师交易系统</h1>
-      
       <button className="toolbar-btn">行情</button>
       <button className="toolbar-btn">分析</button>
       <button className="toolbar-btn">工具</button>

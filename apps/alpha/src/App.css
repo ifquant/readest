@@ -168,14 +168,14 @@ body {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  padding: 0 20px;
-  height: 48px;
-  background-color: var(--bg-primary);
+  padding: 0 15px;
+  height: 32px;
+  background-color: var(--bg-secondary);
   color: var(--text-primary);
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   z-index: 1000;
-  gap: 20px;
-  box-shadow: var(--shadow);
+  gap: 5px;
+  box-shadow: none;
 }
 
 .app-title {
@@ -188,14 +188,16 @@ body {
 .toolbar-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 4px 10px;
+  width: 60px;
   background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: 2px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
   transition: all 0.2s ease;
 }
 
@@ -210,14 +212,15 @@ body {
 }
 
 .timeframe-dropdown {
-  padding: 6px 12px;
-  background-color: var(--bg-primary);
+  padding: 4px 8px;
+  background-color: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: 2px;
+  font-size: 12px;
   cursor: pointer;
   outline: none;
+  min-width: 80px;
 }
 
 .timeframe-dropdown:focus {
@@ -276,7 +279,7 @@ body {
 
 /* 左侧竖向标签栏 */
 .vertical-tabs {
-  width: 60px;
+  width: 35px;
   background-color: var(--bg-primary);
   display: flex;
   flex-direction: column;
@@ -291,7 +294,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 50px;
+  width: 30px;
   height: 50px;
   background: transparent;
   border: 1px solid transparent;
@@ -300,6 +303,7 @@ body {
   border-radius: 4px;
   transition: all 0.2s ease;
   margin-bottom: 5px;
+  overflow: hidden;
 }
 
 .tab-btn:hover:not(.active) {
@@ -316,24 +320,15 @@ body {
 }
 
 .tab-icon {
-  font-size: 18px;
-  margin-bottom: 4px;
+  display: none;
 }
 
 .tab-text {
-  font-size: 10px;
-  text-align: center;
-}
-
-.tab-icon {
-  font-size: 18px;
-  margin-bottom: 4px;
-}
-
-.tab-text {
-  font-size: 10px;
-  text-align: center;
-}
+    font-size: 9px;
+    text-align: center;
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+  }
 
 /* 右侧内容区域 */
 .content-area {
@@ -369,12 +364,93 @@ body {
   background-color: var(--dark-bg-primary);
   color: var(--dark-text-primary);
   position: relative;
+  margin: 0;
+  padding: 0;
 }
 
-/* 搜索弹窗样式 */
+/* 市场数据表格布局 */
+.market-data {
+  margin: 0;
+  background-color: var(--dark-bg-secondary);
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  border: 1px solid var(--dark-border-color);
+  border-top: none;
+}
+
+/* 表头行样式 */
+.market-header-row {
+  display: flex;
+  background-color: var(--dark-bg-tertiary);
+  border-bottom: 2px solid var(--dark-accent-color);
+  padding: 8px 15px;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--dark-text-secondary);
+  line-height: 1.5;
+}
+
+/* 数据行样式 */
+.market-row {
+  display: flex;
+  padding: 8px 15px;
+  border-bottom: 1px solid var(--dark-border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--dark-text-secondary);
+  border: 1px solid transparent;
+  line-height: 1.5;
+}
+
+/* 列宽和对齐设置 */
+.col-symbol {
+  width: 120px;
+  min-width: 120px;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.col-price {
+  width: 100px;
+  min-width: 100px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.col-change {
+  width: 80px;
+  min-width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.col-high,
+.col-low {
+  width: 100px;
+  min-width: 100px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.col-volume {
+  width: 100px;
+  min-width: 100px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.col-actions {
+  width: 80px;
+  min-width: 80px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* 搜索弹窗样式 - 优化自动弹出功能 */
 .search-popup {
   position: absolute;
-  top: 60px;
+  top: 20px;
   left: 20px;
   right: 20px;
   max-width: 600px;
@@ -386,6 +462,19 @@ body {
   max-height: 400px;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 弹窗淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .search-popup-input-wrapper {
@@ -489,66 +578,7 @@ body {
   font-style: italic;
 }
 
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
 
-.search-box input {
-  padding: 6px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 13px;
-  width: 200px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-.market-page .search-box input {
-  background-color: var(--dark-bg-tertiary);
-  color: var(--dark-text-primary);
-  border: 1px solid var(--dark-border-color);
-}
-
-.market-page .search-btn {
-  padding: 6px 10px;
-  background-color: var(--dark-accent-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.market-data {
-  margin: 10px;
-  background-color: var(--dark-bg-secondary);
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: var(--dark-shadow);
-  border: 1px solid var(--dark-border-color);
-}
-
-.market-header {
-  display: flex;
-  background-color: var(--dark-bg-tertiary);
-  border-bottom: 2px solid var(--dark-accent-color);
-  padding: 8px 15px;
-  font-weight: 600;
-  font-size: 12px;
-  color: var(--dark-text-secondary);
-}
-
-.market-row {
-  display: flex;
-  padding: 8px 15px;
-  border-bottom: 1px solid var(--dark-border-color);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--dark-text-secondary);
-  border: 1px solid transparent;
-}
 
 .market-row:hover {
   background-color: #094771;
@@ -1147,9 +1177,7 @@ body {
     display: none;
   }
   
-  .search-box input {
-    width: 150px;
-  }
+
   
   .modal {
     width: 95%;
@@ -1167,9 +1195,7 @@ body {
     align-items: flex-start;
   }
   
-  .search-box input {
-    width: 100%;
-  }
+
   
   .status-bar {
     font-size: 10px;

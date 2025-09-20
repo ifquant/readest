@@ -1,0 +1,286 @@
+/* 订单管理表格样式 */
+.orders-table, .positions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  color: #000000 !important;
+}
+
+.orders-table th, .positions-table th {
+  background-color: #f2f2f2;
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+  color: #000000 !important;
+}
+
+.orders-table td, .positions-table td {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #000000 !important;
+}
+
+.orders-table tr:hover, .positions-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.no-data {
+  text-align: center;
+  color: #666666 !important;
+  padding: 20px !important;
+}
+
+/* 状态标签样式 */
+.status-open {
+  color: #2196F3 !important;
+}
+
+.status-filled {
+  color: #4CAF50 !important;
+}
+
+.status-canceled {
+  color: #f44336 !important;
+}
+
+.status-partial {
+  color: #FFC107 !important;
+}
+
+/* 持仓类型样式 */
+.position-type-long {
+  color: #4CAF50 !important;
+}
+
+.position-type-short {
+  color: #f44336 !important;
+}
+
+/* 盈亏样式 */
+.profit-positive {
+  color: #4CAF50 !important;
+}
+
+.profit-negative {
+  color: #f44336 !important;
+}
+
+/* 按钮样式 */
+.cancel-order-btn, .close-position-btn {
+  background-color: #f44336;
+  color: white !important;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-order-btn:hover, .close-position-btn:hover {
+  background-color: #d32f2f;
+}
+
+/* 订单管理区域样式 */
+.orders-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header h3 {
+  color: #333333 !important;
+  margin: 0;
+}
+
+.order-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.order-tab {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666666 !important;
+}
+
+.order-tab.active {
+  background-color: #007bff;
+  color: white !important;
+  border-color: #007bff;
+}
+
+/* 下单区域样式 */
+.order-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.trade-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.price-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.current-price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333 !important;
+}
+
+.price-change.positive {
+  color: #4CAF50 !important;
+}
+
+.price-change.negative {
+  color: #f44336 !important;
+}
+
+.order-type-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.order-side-btn {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.order-side-btn.active.buy {
+  background-color: #4CAF50;
+  color: white !important;
+  border-color: #4CAF50;
+}
+
+.order-side-btn.active.sell {
+  background-color: #f44336;
+  color: white !important;
+  border-color: #f44336;
+}
+
+.order-type-tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.order-type-tab {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.order-type-tab.active {
+  background-color: #007bff;
+  color: white !important;
+  border-color: #007bff;
+}
+
+.order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  color: #555555 !important;
+  font-weight: bold;
+}
+
+.form-group input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-actions {
+  margin-top: 10px;
+}
+
+.place-order-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.place-order-btn.buy {
+  background-color: #4CAF50;
+  color: white !important;
+}
+
+.place-order-btn.sell {
+  background-color: #f44336;
+  color: white !important;
+}
+
+.symbol-select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333333 !important;
+}
+
+.orders-container {
+  overflow-x: auto;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .orders-table, .positions-table {
+    font-size: 14px;
+  }
+  
+  .orders-table th, .positions-table th,
+  .orders-table td, .positions-table td {
+    padding: 8px 5px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .order-tabs {
+    width: 100%;
+  }
+}

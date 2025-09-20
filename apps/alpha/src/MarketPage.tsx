@@ -23,8 +23,9 @@ const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, s
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [searchResults, setSearchResults] = useState<MarketDataItem[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
 
   // 模拟比特币市场数据
   const bitcoinMarketData: MarketDataItem[] = [
@@ -97,8 +98,7 @@ const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, s
   // 处理点击外部关闭弹窗
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node) &&
-          searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
         setShowSearchPopup(false);
       }
     };
@@ -109,12 +109,44 @@ const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, s
     };
   }, []);
 
-  // 处理搜索框获取焦点时显示弹窗（如果有搜索内容）
-  const handleSearchFocus = () => {
-    if (searchQuery.trim() !== '') {
-      setShowSearchPopup(true);
-    }
-  };
+  // 添加全局键盘事件监听，实现输入时自动弹出搜索框
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // 检查页面是否处于活动状态，且没有其他输入框被聚焦
+      const isPageActive = document.activeElement === document.body || 
+                          (pageRef.current && pageRef.current.contains(document.activeElement));
+      
+      // 只处理字母、数字、点号和斜杠（交易对中常用的字符）
+      const isSearchableKey = /^[a-zA-Z0-9./]$/.test(event.key);
+      
+      if (isPageActive && isSearchableKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+        event.preventDefault();
+        
+        // 如果弹窗未显示，初始化搜索
+        if (!showSearchPopup) {
+          setShowSearchPopup(true);
+          // 延迟设置焦点和值，确保弹窗已经渲染
+          setTimeout(() => {
+            if (searchInputRef.current) {
+              searchInputRef.current.focus();
+              setSearchQuery(event.key);
+              
+              // 过滤结果
+              const results = getCurrentMarketData().filter(item => 
+                item.symbol.toLowerCase().includes(event.key.toLowerCase())
+              );
+              setSearchResults(results);
+            }
+          }, 10);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showSearchPopup, marketType]);
 
   // 获取市场类型对应的标题
   const getMarketTitle = () => {
@@ -130,36 +162,15 @@ const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, s
   };
 
   return (
-    <div className="market-page">
-      <div className="page-header">
-        <div className="search-box" ref={searchRef}>
-          <input 
-            type="text" 
-            placeholder="搜索交易对..." 
-            value={searchQuery} 
-            onChange={handleSearchChange}
-            onFocus={handleSearchFocus}
-          />
-          <button 
-            className="search-btn" 
-            onClick={() => {
-              if (searchQuery.trim() !== '') {
-                setShowSearchPopup(!showSearchPopup);
-              }
-            }}
-          >
-            🔍
-          </button>
-        </div>
-      </div>
-
+    <div className="market-page" ref={pageRef}>
       {/* 搜索弹窗 */}
       {showSearchPopup && (
         <div className="search-popup" ref={popupRef}>
           <div className="search-popup-input-wrapper">
             <input 
+              ref={searchInputRef}
               type="text" 
-              placeholder="继续输入..." 
+              placeholder="搜索交易对..." 
               value={searchQuery} 
               onChange={handleSearchChange}
               autoFocus
@@ -192,10 +203,6 @@ const MarketPage: React.FC<MarketPageProps> = ({ onSymbolSelect, onTradeClick, s
           </div>
         </div>
       )}
-      
-      <div className="current-market-title">
-        <h3>{getMarketTitle()}</h3>
-      </div>
       
       <div className="market-data">
         <div className="market-header-row">

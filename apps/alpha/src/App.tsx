@@ -4,6 +4,7 @@ import TraderPage from './TraderPage';
 import ChartPage from './ChartPage';
 import Toolbars from './Toolbars';
 import Menu from './Menu';
+import Trader from './Trader';
 import './App.css';
 
 // 定义数据接口
@@ -35,7 +36,7 @@ interface Asset {
 
 function App() {
   // 状态管理
-  const [selectedTab, setSelectedTab] = useState<'bitcoin' | 'stockFutures' | 'domesticFutures' | 'trade' | 'orders' | 'assets' | 'strategy'>('bitcoin');
+  const [selectedTab, setSelectedTab] = useState<'bitcoin' | 'stockFutures' | 'domesticFutures' | 'trade' | 'orders' | 'strategy'>('bitcoin');
   const [selectedSymbol, setSelectedSymbol] = useState('BTC/USDT');
   const [currentPrice, setCurrentPrice] = useState(42500.32);
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy');
@@ -139,7 +140,7 @@ function App() {
             onClick={() => setSelectedTab('bitcoin')}
           >
             <span className="tab-icon">₿</span>
-            <span className="tab-text">比特币</span>
+            <span className="tab-text">加密货币</span>
           </button>
           <button 
             className={`tab-btn ${selectedTab === 'stockFutures' ? 'active' : ''}`}
@@ -160,28 +161,14 @@ function App() {
             onClick={() => setSelectedTab('trade')}
           >
             <span className="tab-icon">💹</span>
-            <span className="tab-text">交易</span>
-          </button>
-          <button 
-            className={`tab-btn ${selectedTab === 'orders' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('orders')}
-          >
-            <span className="tab-icon">📋</span>
-            <span className="tab-text">订单</span>
-          </button>
-          <button 
-            className={`tab-btn ${selectedTab === 'assets' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('assets')}
-          >
-            <span className="tab-icon">💰</span>
-            <span className="tab-text">资产</span>
+            <span className="tab-text">交易执行</span>
           </button>
           <button 
             className={`tab-btn ${selectedTab === 'strategy' ? 'active' : ''}`}
             onClick={() => setSelectedTab('strategy')}
           >
             <span className="tab-icon">🤖</span>
-            <span className="tab-text">策略</span>
+            <span className="tab-text">策略执行</span>
           </button>
         </div>
 
@@ -230,207 +217,26 @@ function App() {
                 />
               )}
               
-              {/* 交易页面 */}
+              {/* 交易执行页面 */}
               {selectedTab === 'trade' && (
-                <div className="trade-page">
-                  <div className="page-header">
-                    <h2>交易</h2>
-                    <select 
-                      className="symbol-select"
-                      value={selectedSymbol}
-                      onChange={(e) => setSelectedSymbol(e.target.value)}
-                    >
-                      {marketData.map(item => (
-                        <option key={item.id} value={item.symbol}>{item.symbol}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="trade-container">
-                    <div className="price-info">
-                      <div className="current-price">
-                        ${currentPrice.toLocaleString()}
-                      </div>
-                      <div className="price-change positive">
-                        +2.45%
-                      </div>
-                    </div>
-                    
-                    <div className="order-type-selector">
-                      <button 
-                        className={`order-side-btn ${orderSide === 'buy' ? 'active buy' : ''}`}
-                        onClick={() => setOrderSide('buy')}
-                      >
-                        买入
-                      </button>
-                      <button 
-                        className={`order-side-btn ${orderSide === 'sell' ? 'active sell' : ''}`}
-                        onClick={() => setOrderSide('sell')}
-                      >
-                        卖出
-                      </button>
-                    </div>
-                    
-                    <div className="order-type-tabs">
-                      <button 
-                        className={`order-type-tab ${orderType === 'limit' ? 'active' : ''}`}
-                        onClick={() => setOrderType('limit')}
-                      >
-                        限价单
-                      </button>
-                      <button 
-                        className={`order-type-tab ${orderType === 'market' ? 'active' : ''}`}
-                        onClick={() => setOrderType('market')}
-                      >
-                        市价单
-                      </button>
-                      <button 
-                        className={`order-type-tab ${orderType === 'stop' ? 'active' : ''}`}
-                        onClick={() => setOrderType('stop')}
-                      >
-                        止损单
-                      </button>
-                    </div>
-                    
-                    <form className="order-form" onSubmit={handlePlaceOrder}>
-                      <div className="form-group">
-                        <label>价格 (USD)</label>
-                        <input 
-                          type="number" 
-                          placeholder="输入价格" 
-                          value={orderPrice}
-                          onChange={(e) => setOrderPrice(e.target.value)}
-                          disabled={orderType === 'market'}
-                        />
-                      </div>
-                      
-                      <div className="form-group">
-                        <label>数量 ({selectedSymbol.split('/')[0]})</label>
-                        <input 
-                          type="number" 
-                          placeholder="输入数量" 
-                          value={orderAmount}
-                          onChange={(e) => setOrderAmount(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="form-actions">
-                        <button 
-                          type="submit" 
-                          className={`place-order-btn ${orderSide === 'buy' ? 'buy' : 'sell'}`}
-                        >
-                          {orderSide === 'buy' ? '买入' : '卖出'} {selectedSymbol.split('/')[0]}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+                <Trader 
+                  marketData={marketData} 
+                  openOrders={openOrders} 
+                  orderHistory={orderHistory} 
+                  currentPrice={currentPrice} 
+                />
               )}
               
-              {/* 订单页面 */}
-              {selectedTab === 'orders' && (
-                <div className="orders-page">
-                  <div className="page-header">
-                    <h2>订单</h2>
-                  </div>
-                  
-                  <div className="orders-tabs">
-                    <button 
-                      className={`orders-tab ${!showHistoryOrders ? 'active' : ''}`}
-                      onClick={() => setShowHistoryOrders(false)}
-                    >
-                      当前订单
-                    </button>
-                    <button 
-                      className={`orders-tab ${showHistoryOrders ? 'active' : ''}`}
-                      onClick={() => setShowHistoryOrders(true)}
-                    >
-                      历史订单
-                    </button>
-                  </div>
-                  
-                  <div className="orders-container">
-                    <div className="orders-header">
-                      <span className="col-symbol">交易对</span>
-                      <span className="col-type">类型</span>
-                      <span className="col-price">价格</span>
-                      <span className="col-amount">数量</span>
-                      <span className="col-status">状态</span>
-                      <span className="col-time">时间</span>
-                      <span className="col-actions">操作</span>
-                    </div>
-                    
-                    {!showHistoryOrders ? (
-                      openOrders.map(order => (
-                        <div key={order.id} className="order-row">
-                          <span className="col-symbol">{order.symbol}</span>
-                          <span className={`col-type ${order.type.toLowerCase()}`}>{order.type}</span>
-                          <span className="col-price">${order.price.toFixed(2)}</span>
-                          <span className="col-amount">{order.amount}</span>
-                          <span className="col-status">{order.status}</span>
-                          <span className="col-time">{order.timestamp}</span>
-                          <span className="col-actions">
-                            <button className="cancel-btn">取消</button>
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      orderHistory.map(order => (
-                        <div key={order.id} className="order-row">
-                          <span className="col-symbol">{order.symbol}</span>
-                          <span className={`col-type ${order.type.toLowerCase()}`}>{order.type}</span>
-                          <span className="col-price">${order.price.toFixed(2)}</span>
-                          <span className="col-amount">{order.amount}</span>
-                          <span className="col-status">{order.status}</span>
-                          <span className="col-time">{order.timestamp}</span>
-                          <span className="col-actions">
-                            {order.status === 'Open' && <button className="cancel-btn">取消</button>}
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              {/* 资产页面 */}
-              {selectedTab === 'assets' && (
-                <div className="assets-page">
-                  <div className="page-header">
-                    <h2>资产</h2>
-                  </div>
-                  
-                  <div className="assets-container">
-                    <div className="assets-header">
-                      <span className="col-symbol">币种</span>
-                      <span className="col-balance">余额</span>
-                      <span className="col-available">可用</span>
-                      <span className="col-frozen">冻结</span>
-                      <span className="col-actions">操作</span>
-                    </div>
-                    
-                    {assetsData.map(asset => (
-                      <div key={asset.id} className="asset-row">
-                        <span className="col-symbol">{asset.symbol}</span>
-                        <span className="col-balance">{asset.balance.toFixed(8)}</span>
-                        <span className="col-available">{asset.available.toFixed(8)}</span>
-                        <span className="col-frozen">{asset.frozen.toFixed(8)}</span>
-                        <span className="col-actions">
-                          <button className="deposit-btn">充值</button>
-                          <button className="withdraw-btn">提现</button>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* 策略页面 */}
+              {/* 策略执行页面 - 合并订单和策略功能 */}
               {selectedTab === 'strategy' && (
                 <div className="strategy-page">
                   <div className="page-header">
-                    <h2>交易策略</h2>
+                    <h2>策略执行</h2>
+                  </div>
+                  
+                  <div className="strategy-tabs">
+                    <button className="strategy-tab active">策略管理</button>
+                    <button className="strategy-tab">订单管理</button>
                   </div>
                   
                   <div className="strategy-content">
