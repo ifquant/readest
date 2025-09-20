@@ -1,83 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import ChartPage from './ChartPage';
-import QuotePage from './QuotePage';
+import React, { useEffect } from 'react';
 import './TraderPage.css';
 
-// Tab数据类型定义
 interface TabItem {
   symbol: string;
-  // 可以添加其他需要的信息，如加载状态等
 }
 
 interface TraderPageProps {
   symbol: string;
+  showBackButton: boolean;
   onBack: () => void;
-  showBackButton?: boolean;
+  onAddTab: (symbol: string) => void;
   tabs: TabItem[];
   activeTab: string;
   onTabClick: (symbol: string) => void;
   onTabClose: (symbol: string) => void;
-  onAddTab: (symbol: string) => void;
 }
 
 const TraderPage: React.FC<TraderPageProps> = ({ 
   symbol, 
+  showBackButton, 
   onBack, 
-  showBackButton = false, 
-  tabs, 
-  activeTab, 
-  onTabClick, 
-  onTabClose, 
-  onAddTab 
+  onAddTab,
+  tabs,
+  activeTab,
+  onTabClick,
+  onTabClose
 }) => {
-  // 使用useEffect来确保当首次进入TraderPage时至少有一个tab
+  // 确保首次进入时添加初始tab
   useEffect(() => {
-    if (tabs.length === 0 && symbol) {
+    if (symbol && tabs.length === 0) {
       onAddTab(symbol);
     }
-  }, [symbol, tabs.length, onAddTab]);
+  }, [symbol, onAddTab, tabs.length]);
 
   return (
     <div className="trader-page">
-      {/* Tab栏 */}
+      {/* 返回按钮 - 修复类名 */}
+      {showBackButton && (
+        <button className="back-btn" onClick={onBack}>
+          ← 返回市场
+        </button>
+      )}
+      
+      {/* Tab栏 - 使用正确的类名 */}
       <div className="tabs-container">
         {tabs.map(tab => (
-          <div 
-            key={tab.symbol} 
+          <div
+            key={tab.symbol}
             className={`tab-item ${activeTab === tab.symbol ? 'active' : ''}`}
             onClick={() => onTabClick(tab.symbol)}
           >
-            <span className="tab-label">{tab.symbol}</span>
-            {tabs.length > 1 && (
-              <button 
-                className="tab-close-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onTabClose(tab.symbol);
-                }}
-              >
-                ×
-              </button>
-            )}
+            <span>{tab.symbol}</span>
+            <button 
+              className="tab-close-btn" 
+              onClick={(e) => {
+                e.stopPropagation();
+                onTabClose(tab.symbol);
+              }}
+            >
+              ×
+            </button>
           </div>
         ))}
       </div>
-
-      {/* 交易页面主内容区 */}
+      
+      {/* 简化的内容区域 - 只显示当前交易对 */}
       <div className="trader-content">
-        {activeTab && (
-          <>
-            {/* 左侧图表区域 */}
-            <div className="chart-section">
-              <ChartPage symbol={activeTab} onBackClick={onBack} />
-            </div>
-
-            {/* 右侧盘口信息区域 */}
-            <div className="quote-section">
-              <QuotePage symbol={activeTab} />
-            </div>
-          </>
-        )}
+        <div className="symbol-display">
+          <h2>{symbol}</h2>
+          <p>交易界面已简化，仅显示交易对信息</p>
+        </div>
       </div>
     </div>
   );
