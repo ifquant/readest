@@ -7,6 +7,80 @@
   padding: 20px;
 }
 
+/* Tab相关样式 */
+.tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #333;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #1a1a2e;
+}
+
+.tabs-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tabs-container::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+.tabs-container::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 3px;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #0f3460;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.tab-item:hover {
+  background-color: #16213e;
+}
+
+.tab-item.active {
+  background-color: #16213e;
+  border-bottom: 2px solid #00b4ff;
+  font-weight: 500;
+}
+
+.tab-label {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.tab-close-btn {
+  background: none;
+  border: none;
+  color: #cccccc;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.tab-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
 .page-header {
   display: flex;
   align-items: center;

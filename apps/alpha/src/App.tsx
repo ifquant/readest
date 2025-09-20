@@ -34,6 +34,12 @@ interface Asset {
   frozen: number;
 }
 
+// Tab数据类型定义
+interface TabItem {
+  symbol: string;
+  // 可以添加其他需要的信息，如加载状态等
+}
+
 function App() {
   // 状态管理
   const [selectedTab, setSelectedTab] = useState<'bitcoin' | 'stockFutures' | 'domesticFutures' | 'trade' | 'orders' | 'strategy'>('bitcoin');
@@ -50,6 +56,11 @@ function App() {
   const [timeframe, setTimeframe] = useState<string>('15m');
   const [showHistoryOrders, setShowHistoryOrders] = useState(false);
   const [isDirectSymbolClick, setIsDirectSymbolClick] = useState(false);
+  
+  // 存储所有打开的tabs
+  const [tabs, setTabs] = useState<TabItem[]>([]);
+  // 当前激活的tab
+  const [activeTab, setActiveTab] = useState<string>('');
 
   // 模拟数据
   const marketData: MarketItem[] = [
@@ -89,6 +100,14 @@ function App() {
     return () => clearInterval(interval);
   }, [selectedSymbol, marketData]);
 
+  // 初始化时添加默认tab
+  useEffect(() => {
+    if (tabs.length === 0 && selectedSymbol) {
+      setTabs([{ symbol: selectedSymbol }]);
+      setActiveTab(selectedSymbol);
+    }
+  }, []);
+
   // 下单处理函数
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,15 +119,47 @@ function App() {
     }
   };
 
+  // 添加新的tab
+  const addTab = (symbol: string) => {
+    if (!tabs.some(tab => tab.symbol === symbol)) {
+      // 如果当前合约不存在，则添加新tab
+      setTabs(prevTabs => [...prevTabs, { symbol }]);
+    }
+    setActiveTab(symbol);
+    setSelectedSymbol(symbol);
+  };
+
+  // 切换tab
+  const handleTabClick = (symbol: string) => {
+    setActiveTab(symbol);
+    setSelectedSymbol(symbol);
+  };
+
+  // 关闭tab
+  const handleTabClose = (symbolToClose: string) => {
+    if (tabs.length <= 1) return; // 至少保留一个tab
+    
+    const newTabs = tabs.filter(tab => tab.symbol !== symbolToClose);
+    setTabs(newTabs);
+    
+    // 如果关闭的是当前激活的tab，则激活第一个tab
+    if (activeTab === symbolToClose) {
+      setActiveTab(newTabs[0].symbol);
+      setSelectedSymbol(newTabs[0].symbol);
+    }
+  };
+
   // 行情点击事件
   const handleSymbolClick = (symbol: string) => {
-    setSelectedSymbol(symbol);
+    addTab(symbol);
     setIsDirectSymbolClick(true); // 标记为直接点击合约
+    // 如果已经在TraderPage中，不需要额外操作
+    // 如果不在TraderPage中，保持当前页面
   };
 
   // 跳转到交易页面
   const goToTraderPage = (symbol: string) => {
-    setSelectedSymbol(symbol);
+    addTab(symbol);
     setShowTraderPage(true);
     setIsDirectSymbolClick(true); // 标记为直接点击合约
   };
@@ -118,6 +169,7 @@ function App() {
     setShowTraderPage(false);
     setShowChartPage(false);
     setIsDirectSymbolClick(false); // 重置标记
+    // 注意：这里不再清除tab状态，保持tab状态持久化
   };
 
   return (
@@ -209,6 +261,11 @@ function App() {
               symbol={selectedSymbol} 
               onBack={handleBackToMarket} 
               showBackButton={!isDirectSymbolClick}
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabClick={handleTabClick}
+              onTabClose={handleTabClose}
+              onAddTab={addTab}
             />
           ) : (
             <>
