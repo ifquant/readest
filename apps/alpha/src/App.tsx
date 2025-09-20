@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import MarketPage from './MarketPage';
-import TraderPage from './TraderPage';
+import TradePages from './TradePages';
 import ChartPage from './ChartPage';
 import Toolbars from './Toolbars';
 import Menu from './Menu';
-import Trader from './Trader';
+import { Outlet, useNavigate } from 'react-router-dom';
 import './App.css';
 
 // 定义数据接口
@@ -56,6 +56,9 @@ function App() {
   const [timeframe, setTimeframe] = useState<string>('15m');
   const [showHistoryOrders, setShowHistoryOrders] = useState(false);
   const [isDirectSymbolClick, setIsDirectSymbolClick] = useState(false);
+  
+  // 添加导航钩子
+  const navigate = useNavigate();
   
   // 存储所有打开的tabs
   const [tabs, setTabs] = useState<TabItem[]>([]);
@@ -197,6 +200,7 @@ function App() {
               setSelectedTab('bitcoin');
               setShowTraderPage(false);
               setShowChartPage(false);
+              navigate('/market/bitcoin');
             }}
           >
             <span className="tab-icon">₿</span>
@@ -208,6 +212,7 @@ function App() {
               setSelectedTab('stockFutures');
               setShowTraderPage(false);
               setShowChartPage(false);
+              navigate('/market/stockFutures');
             }}
           >
             <span className="tab-icon">📈</span>
@@ -219,6 +224,7 @@ function App() {
               setSelectedTab('domesticFutures');
               setShowTraderPage(false);
               setShowChartPage(false);
+              navigate('/market/domesticFutures');
             }}
           >
             <span className="tab-icon">🏛️</span>
@@ -230,6 +236,7 @@ function App() {
               setSelectedTab('trade');
               setShowTraderPage(false);
               setShowChartPage(false);
+              navigate('/trade');
             }}
           >
             <span className="tab-icon">💹</span>
@@ -248,95 +255,9 @@ function App() {
           </button>
         </div>
 
-        {/* 右侧内容区域 */}
+        {/* 右侧内容区域 - 使用Outlet来渲染路由子组件 */}
         <div className="content-area">
-          {showChartPage ? (
-            <ChartPage 
-              symbol={selectedSymbol} 
-              onBackClick={handleBackToMarket} 
-              timeframe={timeframe}
-            />
-          ) : showTraderPage ? (
-            <TraderPage 
-              symbol={selectedSymbol} 
-              onBack={handleBackToMarket} 
-              showBackButton={!isDirectSymbolClick}
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabClick={handleTabClick}
-              onTabClose={handleTabClose}
-              onAddTab={addTab}
-            />
-          ) : (
-            <>
-              {/* 比特币行情页面 */}
-              {selectedTab === 'bitcoin' && (
-                <MarketPage 
-                  onSymbolSelect={goToTraderPage} 
-                  onTradeClick={() => setSelectedTab('trade')} 
-                  selectedSymbol={selectedSymbol} 
-                  marketType="bitcoin"
-                />
-              )}
-              
-              {/* 股指期货行情页面 */}
-              {selectedTab === 'stockFutures' && (
-                <MarketPage 
-                  onSymbolSelect={goToTraderPage} 
-                  onTradeClick={() => setSelectedTab('trade')} 
-                  selectedSymbol={selectedSymbol} 
-                  marketType="stockFutures"
-                />
-              )}
-              
-              {/* 国内期货行情页面 */}
-              {selectedTab === 'domesticFutures' && (
-                <MarketPage 
-                  onSymbolSelect={goToTraderPage} 
-                  onTradeClick={() => setSelectedTab('trade')} 
-                  selectedSymbol={selectedSymbol} 
-                  marketType="domesticFutures"
-                />
-              )}
-              
-              {/* 交易执行页面 */}
-              {selectedTab === 'trade' && (
-                <Trader 
-                  marketData={marketData} 
-                  openOrders={openOrders} 
-                  orderHistory={orderHistory} 
-                  currentPrice={currentPrice} 
-                />
-              )}
-              
-              {/* 策略执行页面 - 合并订单和策略功能 */}
-              {selectedTab === 'strategy' && (
-                <div className="strategy-page">
-                  <div className="page-header">
-                    <h2>策略执行</h2>
-                  </div>
-                  
-                  <div className="strategy-tabs">
-                    <button className="strategy-tab active">策略管理</button>
-                    <button className="strategy-tab">订单管理</button>
-                  </div>
-                  
-                  <div className="strategy-content">
-                    <div className="strategy-placeholder">
-                      <p>策略管理功能正在开发中...</p>
-                      <p>即将支持：</p>
-                      <ul>
-                        <li>策略创建与编辑</li>
-                        <li>策略回测</li>
-                        <li>策略部署</li>
-                        <li>策略监控</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+          <Outlet />
         </div>
       </div>
 
@@ -351,67 +272,52 @@ function App() {
           </div>
         </div>
         <div className="status-right">
-          <span className="status-item">网络延迟: 25ms</span>
-          <span className="status-item">内存使用率: 45%</span>
+          <span className="status-item">内存使用率: 35%</span>
+          <span className="status-item">延迟: 23ms</span>
         </div>
       </div>
 
-      {/* 登录模态框 */}
+      {/* 登录弹窗 */}
       {showLoginModal && (
         <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>用户登录</h2>
-              <button 
-                className="close-btn" 
-                onClick={() => setShowLoginModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={(e) => e.preventDefault()}>
-                <div className="form-group">
-                  <label htmlFor="username">用户名</label>
-                  <input 
-                    type="text" 
-                    id="username" 
-                    placeholder="请输入用户名"
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="password">密码</label>
-                  <input 
-                    type="password" 
-                    id="password" 
-                    placeholder="请输入密码"
-                  />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="btn-primary">登录</button>
-                </div>
-              </form>
-            </div>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>用户登录</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              setShowLoginModal(false);
+            }}>
+              <input type="text" placeholder="用户名" className="login-input" />
+              <input type="password" placeholder="密码" className="login-input" />
+              <button type="submit" className="login-btn">登录</button>
+              <button type="button" className="cancel-btn" onClick={() => setShowLoginModal(false)}>取消</button>
+            </form>
           </div>
         </div>
       )}
 
-      {/* 设置模态框 */}
+      {/* 设置弹窗 */}
       {showSettingsModal && (
         <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>系统设置</h2>
-              <button 
-                className="close-btn" 
-                onClick={() => setShowSettingsModal(false)}
-              >
-                ×
-              </button>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>系统设置</h2>
+            <div className="settings-content">
+              <div className="setting-item">
+                <label>主题</label>
+                <select defaultValue="light">
+                  <option value="light">浅色</option>
+                  <option value="dark">深色</option>
+                </select>
+              </div>
+              <div className="setting-item">
+                <label>语言</label>
+                <select defaultValue="zh">
+                  <option value="zh">中文</option>
+                  <option value="en">英文</option>
+                </select>
+              </div>
             </div>
-            <div className="modal-body">
-              <p>设置功能正在开发中...</p>
-            </div>
+            <button className="save-btn" onClick={() => setShowSettingsModal(false)}>保存</button>
+            <button className="cancel-btn" onClick={() => setShowSettingsModal(false)}>取消</button>
           </div>
         </div>
       )}

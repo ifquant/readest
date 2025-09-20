@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TraderPage.css';
+import './Trader.css';
 
 // 内联样式以解决表格文字颜色问题
 const style = document.createElement('style');
@@ -85,9 +85,9 @@ style.textContent = `
     background-color: #d32f2f;
   }
 `;
+
 document.head.appendChild(style);
 
-// 定义数据接口
 interface Order {
   id: string;
   symbol: string;
@@ -98,19 +98,17 @@ interface Order {
   timestamp: string;
 }
 
-// 定义持仓接口
 interface Position {
   id: string;
   symbol: string;
+  side: string;
+  price: number;
   amount: number;
-  avgPrice: number;
-  currentPrice: number;
   profit: number;
-  profitPercentage: number;
-  type: 'long' | 'short';
+  status: string;
 }
 
-interface MarketItem {
+interface MarketDataItem {
   id: number;
   symbol: string;
   price: number;
@@ -119,304 +117,419 @@ interface MarketItem {
 }
 
 interface TraderProps {
-  marketData: MarketItem[];
+  marketData: MarketDataItem[];
   openOrders: Order[];
   orderHistory: Order[];
   currentPrice: number;
-  positions?: Position[];
 }
 
-const Trader: React.FC<TraderProps> = ({ 
-  marketData, 
-  openOrders, 
-  orderHistory, 
-  currentPrice, 
-  positions = []
-}) => {
+const Trader: React.FC<TraderProps> = ({ marketData, openOrders, orderHistory, currentPrice }) => {
   // 状态管理
   const [selectedSymbol, setSelectedSymbol] = useState('BTC/USDT');
+  const [orderType, setOrderType] = useState<'limit' | 'market'>('limit');
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy');
-  const [orderType, setOrderType] = useState<'limit' | 'market' | 'stop'>('limit');
   const [orderPrice, setOrderPrice] = useState('');
   const [orderAmount, setOrderAmount] = useState('');
-  const [showHistoryOrders, setShowHistoryOrders] = useState(false);
-  const [activeTab, setActiveTab] = useState<'orders' | 'positions'>('orders');
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showPositionDetails, setShowPositionDetails] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [strategyName, setStrategyName] = useState('');
+  const [strategyType, setStrategyType] = useState<string>('');
+  const [strategyParams, setStrategyParams] = useState({});
+  const [activeTradingView, setActiveTradingView] = useState<'orders' | 'positions' | 'strategy'>('orders');
 
-  // 模拟持仓数据（如果没有从props传入）
-  const mockPositions: Position[] = positions.length > 0 ? positions : [
-    {
-      id: 'pos1',
-      symbol: 'BTC/USDT',
-      amount: 0.5,
-      avgPrice: 41000,
-      currentPrice: currentPrice,
-      profit: (currentPrice - 41000) * 0.5,
-      profitPercentage: ((currentPrice - 41000) / 41000) * 100,
-      type: 'long'
-    },
-    {
-      id: 'pos2',
-      symbol: 'ETH/USDT',
-      amount: 5,
-      avgPrice: 2300,
-      currentPrice: 2250,
-      profit: (2250 - 2300) * 5,
-      profitPercentage: ((2250 - 2300) / 2300) * 100,
-      type: 'long'
-    }
-  ];
-
-  // 下单处理函数
-  const handlePlaceOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!orderAmount || parseFloat(orderAmount) <= 0) {
-      alert('请输入有效的数量');
-      return;
-    }
-    
-    if (orderType !== 'market' && (!orderPrice || parseFloat(orderPrice) <= 0)) {
-      alert('请输入有效的价格');
-      return;
-    }
-    
-    // 这里可以添加实际的下单逻辑
-    alert(`已下单: ${orderSide === 'buy' ? '买入' : '卖出'} ${orderAmount} ${selectedSymbol.split('/')[0]}`);
+  // 处理下单
+  const handlePlaceOrder = () => {
+    // 实现下单逻辑
+    console.log('Placing order:', {
+      symbol: selectedSymbol,
+      type: orderType,
+      side: orderSide,
+      price: orderPrice,
+      amount: orderAmount
+    });
     
     // 重置表单
+    setOrderPrice('');
     setOrderAmount('');
-    if (orderType === 'limit') {
-      setOrderPrice('');
-    }
   };
 
-  // 获取当前选中的符号数据
-  const currentSymbolData = marketData.find(item => item.symbol === selectedSymbol);
-  const priceChange = currentSymbolData?.change || 0;
-  const isPositiveChange = priceChange >= 0;
+  // 处理取消订单
+  const handleCancelOrder = (orderId: string) => {
+    // 实现取消订单逻辑
+    console.log('Canceling order:', orderId);
+  };
+
+  // 处理策略创建
+  const handleCreateStrategy = () => {
+    // 实现策略创建逻辑
+    console.log('Creating strategy:', {
+      name: strategyName,
+      type: strategyType,
+      params: strategyParams
+    });
+    
+    // 重置表单
+    setStrategyName('');
+    setStrategyType('');
+    setStrategyParams({});
+  };
+
+  // 格式化时间戳
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
 
   return (
     <div className="trader-page">
-      {/* 页面头部 */}
-      <div className="page-header">
-        <h2>交易执行</h2>
-        <select 
-          className="symbol-select"
-          value={selectedSymbol}
-          onChange={(e) => setSelectedSymbol(e.target.value)}
-        >
-          {marketData.map(item => (
-            <option key={item.id} value={item.symbol}>{item.symbol}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* 订单管理区域 */}
-      <div className="orders-section">
-        <div className="section-header">
-          <h3>订单管理</h3>
-          <div className="order-tabs">
-            <button 
-              className={`order-tab ${activeTab === 'orders' ? 'active' : ''}`}
-              onClick={() => setActiveTab('orders')}
-            >
-              当前委托
-            </button>
-            <button 
-              className={`order-tab ${activeTab === 'positions' ? 'active' : ''}`}
-              onClick={() => setActiveTab('positions')}
-            >
-              当前持仓
-            </button>
-          </div>
+      {/* 顶部状态栏 */}
+      <div className="trader-header">
+        <div className="trader-title">交易执行</div>
+        <div className="trader-info">
+          <span className="current-price">当前价格: ${currentPrice.toLocaleString()}</span>
+          <span className="connection-status">已连接</span>
         </div>
-        
-        <div className="orders-container">
-          {activeTab === 'orders' ? (
-            // 当前委托表格
-            <table className="orders-table">
-              <thead>
-                <tr>
-                  <th>订单ID</th>
-                  <th>交易对</th>
-                  <th>类型</th>
-                  <th>价格</th>
-                  <th>数量</th>
-                  <th>状态</th>
-                  <th>时间</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {openOrders.length > 0 ? (
-                  openOrders.map(order => (
-                    <tr key={order.id}>
-                      <td>{order.id}</td>
-                      <td>{order.symbol}</td>
-                      <td>{order.type}</td>
-                      <td>${order.price.toLocaleString()}</td>
-                      <td>{order.amount}</td>
-                      <td>
-                        <span className={`status-${order.status.toLowerCase()}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td>{order.timestamp}</td>
-                      <td>
-                        {order.status === 'Open' && (
-                          <button className="cancel-order-btn">取消</button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8} className="no-data">暂无未成交订单</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      </div>
+      
+      {/* 交易对选择器 */}
+      <div className="symbol-selector">
+        <select value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)}>
+          {marketData.length > 0 ? (
+            marketData.map(item => (
+              <option key={item.id} value={item.symbol}>{item.symbol}</option>
+            ))
           ) : (
-            // 当前持仓表格
-            <table className="positions-table">
-              <thead>
-                <tr>
-                  <th>交易对</th>
-                  <th>持仓类型</th>
-                  <th>持仓数量</th>
-                  <th>平均价格</th>
-                  <th>当前价格</th>
-                  <th>盈亏金额</th>
-                  <th>盈亏比例</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockPositions.length > 0 ? (
-                  mockPositions.map(position => (
-                    <tr key={position.id}>
-                      <td>{position.symbol}</td>
-                      <td>
-                        <span className={`position-type-${position.type}`}>
-                          {position.type === 'long' ? '多头' : '空头'}
-                        </span>
-                      </td>
-                      <td>{position.amount}</td>
-                      <td>${position.avgPrice.toLocaleString()}</td>
-                      <td>${position.currentPrice.toLocaleString()}</td>
-                      <td>
-                        <span className={`profit-${position.profit >= 0 ? 'positive' : 'negative'}`}>
-                          {position.profit >= 0 ? '+' : ''}${position.profit.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`profit-${position.profitPercentage >= 0 ? 'positive' : 'negative'}`}>
-                          {position.profitPercentage >= 0 ? '+' : ''}{position.profitPercentage.toFixed(2)}%
-                        </span>
-                      </td>
-                      <td>
-                        <button className="close-position-btn">平仓</button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8} className="no-data">暂无持仓</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <option value="BTC/USDT">BTC/USDT</option>
           )}
-        </div>
+        </select>
+        <button className="chart-toggle-btn" onClick={() => setShowChart(!showChart)}>
+          {showChart ? '隐藏图表' : '显示图表'}
+        </button>
       </div>
-
-      {/* 下单区域 */}
-      <div className="order-section">
-        <div className="section-header">
-          <h3>交易执行</h3>
-        </div>
-        
-        <div className="trade-container">
-          <div className="price-info">
-            <div className="current-price">
-              ${currentPrice.toLocaleString()}
-            </div>
-            <div className={`price-change ${isPositiveChange ? 'positive' : 'negative'}`}>
-              {isPositiveChange ? '+' : ''}{priceChange}%
-            </div>
+      
+      {/* 图表区域 */}
+      {showChart && (
+        <div className="chart-container">
+          <div className="chart-placeholder">
+            图表区域 - 可集成TradingView等图表库
           </div>
+        </div>
+      )}
+      
+      {/* 交易操作区域 */}
+      <div className="trading-area">
+        {/* 左侧：下单表单 */}
+        <div className="order-form">
+          <h3>下单</h3>
           
+          {/* 订单类型选择 */}
           <div className="order-type-selector">
             <button 
-              className={`order-side-btn ${orderSide === 'buy' ? 'active buy' : ''}`}
+              className={`order-type-btn ${orderType === 'limit' ? 'active' : ''}`}
+              onClick={() => setOrderType('limit')}
+            >
+              限价
+            </button>
+            <button 
+              className={`order-type-btn ${orderType === 'market' ? 'active' : ''}`}
+              onClick={() => setOrderType('market')}
+            >
+              市价
+            </button>
+          </div>
+          
+          {/* 买卖方向选择 */}
+          <div className="order-side-selector">
+            <button 
+              className={`order-side-btn buy ${orderSide === 'buy' ? 'active' : ''}`}
               onClick={() => setOrderSide('buy')}
             >
               买入
             </button>
             <button 
-              className={`order-side-btn ${orderSide === 'sell' ? 'active sell' : ''}`}
+              className={`order-side-btn sell ${orderSide === 'sell' ? 'active' : ''}`}
               onClick={() => setOrderSide('sell')}
             >
               卖出
             </button>
           </div>
           
-          <div className="order-type-tabs">
+          {/* 订单参数输入 */}
+          {orderType === 'limit' && (
+            <div className="order-inputs">
+              <div className="input-group">
+                <label>价格</label>
+                <input 
+                  type="number" 
+                  value={orderPrice}
+                  onChange={(e) => setOrderPrice(e.target.value)}
+                  placeholder="输入价格"
+                  step="0.01"
+                />
+              </div>
+            </div>
+          )}
+          
+          <div className="order-inputs">
+            <div className="input-group">
+              <label>数量</label>
+              <input 
+                type="number" 
+                value={orderAmount}
+                onChange={(e) => setOrderAmount(e.target.value)}
+                placeholder="输入数量"
+                step="0.001"
+              />
+            </div>
+          </div>
+          
+          {/* 下单按钮 */}
+          <button 
+            className={`place-order-btn ${orderSide === 'buy' ? 'buy' : 'sell'}`}
+            onClick={handlePlaceOrder}
+            disabled={!orderAmount || (orderType === 'limit' && !orderPrice)}
+          >
+            {orderSide === 'buy' ? '买入' : '卖出'} {selectedSymbol}
+          </button>
+        </div>
+        
+        {/* 右侧：交易视图切换 */}
+        <div className="trading-views">
+          {/* 视图切换选项卡 */}
+          <div className="view-tabs">
             <button 
-              className={`order-type-tab ${orderType === 'limit' ? 'active' : ''}`}
-              onClick={() => setOrderType('limit')}
+              className={`view-tab ${activeTradingView === 'orders' ? 'active' : ''}`}
+              onClick={() => setActiveTradingView('orders')}
             >
-              限价单
+              订单管理
             </button>
             <button 
-              className={`order-type-tab ${orderType === 'market' ? 'active' : ''}`}
-              onClick={() => setOrderType('market')}
+              className={`view-tab ${activeTradingView === 'positions' ? 'active' : ''}`}
+              onClick={() => setActiveTradingView('positions')}
             >
-              市价单
+              持仓管理
             </button>
             <button 
-              className={`order-type-tab ${orderType === 'stop' ? 'active' : ''}`}
-              onClick={() => setOrderType('stop')}
+              className={`view-tab ${activeTradingView === 'strategy' ? 'active' : ''}`}
+              onClick={() => setActiveTradingView('strategy')}
             >
-              止损单
+              策略管理
             </button>
           </div>
           
-          <form className="order-form" onSubmit={handlePlaceOrder}>
-            <div className="form-group">
-              <label>价格 (USD)</label>
-              <input 
-                type="number" 
-                placeholder="输入价格"
-                step="0.01"
-                min="0"
-                value={orderPrice}
-                onChange={(e) => setOrderPrice(e.target.value)}
-                disabled={orderType === 'market'}
-              />
+          {/* 订单管理视图 */}
+          {activeTradingView === 'orders' && (
+            <div className="orders-view">
+              {/* 未成交订单 */}
+              <div className="open-orders-section">
+                <div className="section-header">
+                  <h4>未成交订单</h4>
+                  <button onClick={() => setShowOrderDetails(!showOrderDetails)}>
+                    {showOrderDetails ? '收起详情' : '展开详情'}
+                  </button>
+                </div>
+                <table className="orders-table">
+                  <thead>
+                    <tr>
+                      <th>交易对</th>
+                      <th>类型</th>
+                      <th>方向</th>
+                      <th>价格</th>
+                      <th>数量</th>
+                      <th>状态</th>
+                      <th>时间</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {openOrders.length > 0 ? (
+                      openOrders.map(order => (
+                        <tr key={order.id}>
+                          <td>{order.symbol}</td>
+                          <td>{order.type}</td>
+                          <td>{order.type === 'limit' ? '限价' : '市价'}</td>
+                          <td>${order.price.toLocaleString()}</td>
+                          <td>{order.amount}</td>
+                          <td className={`status-${order.status}`}>{order.status}</td>
+                          <td>{formatTimestamp(order.timestamp)}</td>
+                          <td>
+                            <button className="cancel-order-btn" onClick={() => handleCancelOrder(order.id)}>
+                              取消
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={8} className="no-data">暂无未成交订单</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* 历史订单 */}
+              <div className="order-history-section">
+                <div className="section-header">
+                  <h4>历史订单</h4>
+                </div>
+                <table className="orders-table">
+                  <thead>
+                    <tr>
+                      <th>交易对</th>
+                      <th>类型</th>
+                      <th>方向</th>
+                      <th>价格</th>
+                      <th>数量</th>
+                      <th>状态</th>
+                      <th>时间</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orderHistory.length > 0 ? (
+                      orderHistory.map(order => (
+                        <tr key={order.id}>
+                          <td>{order.symbol}</td>
+                          <td>{order.type}</td>
+                          <td>{order.type === 'limit' ? '限价' : '市价'}</td>
+                          <td>${order.price.toLocaleString()}</td>
+                          <td>{order.amount}</td>
+                          <td className={`status-${order.status}`}>{order.status}</td>
+                          <td>{formatTimestamp(order.timestamp)}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="no-data">暂无历史订单</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            
-            <div className="form-group">
-              <label>数量 ({selectedSymbol.split('/')[0]})</label>
-              <input 
-                type="number" 
-                placeholder="输入数量"
-                step="0.000001"
-                min="0"
-                value={orderAmount}
-                onChange={(e) => setOrderAmount(e.target.value)}
-                required
-              />
+          )}
+          
+          {/* 持仓管理视图 */}
+          {activeTradingView === 'positions' && (
+            <div className="positions-view">
+              <div className="section-header">
+                <h4>当前持仓</h4>
+                <button onClick={() => setShowPositionDetails(!showPositionDetails)}>
+                  {showPositionDetails ? '收起详情' : '展开详情'}
+                </button>
+              </div>
+              <table className="positions-table">
+                <thead>
+                  <tr>
+                    <th>交易对</th>
+                    <th>方向</th>
+                    <th>开仓价格</th>
+                    <th>持仓数量</th>
+                    <th>浮动盈亏</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {positions.length > 0 ? (
+                    positions.map(position => (
+                      <tr key={position.id}>
+                        <td>{position.symbol}</td>
+                        <td>{position.side}</td>
+                        <td>${position.price.toLocaleString()}</td>
+                        <td>{position.amount}</td>
+                        <td className={position.profit >= 0 ? 'profit-positive' : 'profit-negative'}>
+                          {position.profit >= 0 ? '+' : ''}{position.profit.toLocaleString()}
+                        </td>
+                        <td className={`status-${position.status}`}>{position.status}</td>
+                        <td>
+                          <button className="close-position-btn">平仓</button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="no-data">暂无持仓</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-            
-            <div className="form-actions">
-              <button 
-                type="submit" 
-                className={`place-order-btn ${orderSide === 'buy' ? 'buy' : 'sell'}`}
-              >
-                {orderSide === 'buy' ? '买入' : '卖出'} {selectedSymbol.split('/')[0]}
-              </button>
+          )}
+          
+          {/* 策略管理视图 */}
+          {activeTradingView === 'strategy' && (
+            <div className="strategy-view">
+              <div className="section-header">
+                <h4>策略管理</h4>
+              </div>
+              <div className="strategy-form">
+                <div className="input-group">
+                  <label>策略名称</label>
+                  <input 
+                    type="text" 
+                    value={strategyName}
+                    onChange={(e) => setStrategyName(e.target.value)}
+                    placeholder="输入策略名称"
+                  />
+                </div>
+                <div className="input-group">
+                  <label>策略类型</label>
+                  <select 
+                    value={strategyType}
+                    onChange={(e) => setStrategyType(e.target.value)}
+                  >
+                    <option value="">请选择策略类型</option>
+                    <option value="movingAverage">均线策略</option>
+                    <option value="rsi">RSI策略</option>
+                    <option value="macd">MACD策略</option>
+                    <option value="bollinger">布林带策略</option>
+                  </select>
+                </div>
+                {/* 策略参数设置（根据策略类型动态显示） */}
+                {strategyType && (
+                  <div className="strategy-params">
+                    <h5>策略参数</h5>
+                    {/* 这里可以根据策略类型动态生成参数输入框 */}
+                  </div>
+                )}
+                <button 
+                  className="create-strategy-btn"
+                  onClick={handleCreateStrategy}
+                  disabled={!strategyName || !strategyType}
+                >
+                  创建策略
+                </button>
+              </div>
+              
+              {/* 已创建策略列表 */}
+              <div className="strategy-list">
+                <h4>已创建策略</h4>
+                <div className="strategy-items">
+                  <div className="strategy-item">
+                    <div className="strategy-info">
+                      <div className="strategy-name">示例均线策略</div>
+                      <div className="strategy-status active">运行中</div>
+                    </div>
+                    <div className="strategy-actions">
+                      <button className="strategy-action-btn">暂停</button>
+                      <button className="strategy-action-btn">编辑</button>
+                      <button className="strategy-action-btn">删除</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </form>
+          )}
         </div>
       </div>
     </div>
