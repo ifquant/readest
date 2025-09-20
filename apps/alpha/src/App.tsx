@@ -49,6 +49,7 @@ function App() {
   const [showTraderPage, setShowTraderPage] = useState(false);
   const [timeframe, setTimeframe] = useState<string>('15m');
   const [showHistoryOrders, setShowHistoryOrders] = useState(false);
+  const [isDirectSymbolClick, setIsDirectSymbolClick] = useState(false);
 
   // 模拟数据
   const marketData: MarketItem[] = [
@@ -102,18 +103,21 @@ function App() {
   // 行情点击事件
   const handleSymbolClick = (symbol: string) => {
     setSelectedSymbol(symbol);
+    setIsDirectSymbolClick(true); // 标记为直接点击合约
   };
 
   // 跳转到交易页面
   const goToTraderPage = (symbol: string) => {
     setSelectedSymbol(symbol);
     setShowTraderPage(true);
+    setIsDirectSymbolClick(true); // 标记为直接点击合约
   };
 
   // 返回市场页面
   const handleBackToMarket = () => {
     setShowTraderPage(false);
     setShowChartPage(false);
+    setIsDirectSymbolClick(false); // 重置标记
   };
 
   return (
@@ -137,35 +141,55 @@ function App() {
         <div className="vertical-tabs">
           <button 
             className={`tab-btn ${selectedTab === 'bitcoin' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('bitcoin')}
+            onClick={() => {
+              setSelectedTab('bitcoin');
+              setShowTraderPage(false);
+              setShowChartPage(false);
+            }}
           >
             <span className="tab-icon">₿</span>
             <span className="tab-text">加密货币</span>
           </button>
           <button 
             className={`tab-btn ${selectedTab === 'stockFutures' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('stockFutures')}
+            onClick={() => {
+              setSelectedTab('stockFutures');
+              setShowTraderPage(false);
+              setShowChartPage(false);
+            }}
           >
             <span className="tab-icon">📈</span>
             <span className="tab-text">股指期货</span>
           </button>
           <button 
             className={`tab-btn ${selectedTab === 'domesticFutures' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('domesticFutures')}
+            onClick={() => {
+              setSelectedTab('domesticFutures');
+              setShowTraderPage(false);
+              setShowChartPage(false);
+            }}
           >
             <span className="tab-icon">🏛️</span>
             <span className="tab-text">国内期货</span>
           </button>
           <button 
             className={`tab-btn ${selectedTab === 'trade' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('trade')}
+            onClick={() => {
+              setSelectedTab('trade');
+              setShowTraderPage(false);
+              setShowChartPage(false);
+            }}
           >
             <span className="tab-icon">💹</span>
             <span className="tab-text">交易执行</span>
           </button>
           <button 
             className={`tab-btn ${selectedTab === 'strategy' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('strategy')}
+            onClick={() => {
+              setSelectedTab('strategy');
+              setShowTraderPage(false);
+              setShowChartPage(false);
+            }}
           >
             <span className="tab-icon">🤖</span>
             <span className="tab-text">策略执行</span>
@@ -184,6 +208,7 @@ function App() {
             <TraderPage 
               symbol={selectedSymbol} 
               onBack={handleBackToMarket} 
+              showBackButton={!isDirectSymbolClick}
             />
           ) : (
             <>

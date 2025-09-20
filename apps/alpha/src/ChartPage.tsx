@@ -163,7 +163,7 @@ const ChartPage: React.FC<ChartPageProps> = ({ symbol, onBackClick, timeframe })
     const option: echarts.EChartsOption = {
       backgroundColor: '#1a1a2e',
       title: {
-        text: `${symbol} K线图`,
+        text: `${symbol}`,
         left: 'center',
         top: 20,
         textStyle: {
@@ -414,27 +414,18 @@ const ChartPage: React.FC<ChartPageProps> = ({ symbol, onBackClick, timeframe })
   const lastCandle = getLastCandle();
 
   if (loading) {
-    return (
-      <div className="chart-page">
-        <div className="page-header">
-          <button className="back-btn" onClick={onBackClick}>← 返回</button>
-          <h2>{symbol} - 加载中...</h2>
-        </div>
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>正在加载K线数据...</p>
-        </div>
-      </div>
-    );
-  }
+        return (
+          <div className="chart-page">
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>正在加载K线数据...</p>
+            </div>
+          </div>
+        );
+      }
 
   return (
-    <div className="chart-page">
-        <div className="page-header">
-          <button className="back-btn" onClick={onBackClick}>← 返回</button>
-          <h2>{symbol} K线图</h2>
-        </div>
-
+      <div className="chart-page">
         {/* K线图区域 */}
         <div className="chart-container">
           <div 
@@ -478,7 +469,7 @@ const ChartPage: React.FC<ChartPageProps> = ({ symbol, onBackClick, timeframe })
           )}
         </div>
       </div>
-  );
+    );
 };
 
 export default ChartPage;
