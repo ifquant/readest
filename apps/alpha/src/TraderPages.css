@@ -188,3 +188,36 @@
     padding: 15px;
   }
 }
+
+
+/* 价格信息相关样式 */
+.price-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #0f3460;
+  border-radius: 8px;
+}
+
+.current-price {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffffff;
+}
+
+.price-change {
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.price-change.positive {
+  color: #00ff9d;
+  background-color: rgba(0, 255, 157, 0.1);
+}
+
+.price-change.negative {
+  color: #ff4d4f;
+  background-color: rgba(255, 77, 79, 0.1);
+}

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
+import './App.css';
+import Menu from './Menu';
+import Toolbars from './Toolbars';
 import MarketPage from './MarketPage';
 import TradePages from './TradePages';
 import ChartPage from './ChartPage';
-import Toolbars from './Toolbars';
-import Menu from './Menu';
-import { Outlet, useNavigate } from 'react-router-dom';
-import './App.css';
+import Trader from './Trader';
 
 // 定义数据接口
 interface MarketItem {
@@ -26,90 +27,46 @@ interface Order {
   timestamp: string;
 }
 
-interface Asset {
-  id: string;
-  symbol: string;
-  balance: number;
-  available: number;
-  frozen: number;
-}
-
-// Tab数据类型定义
-interface TabItem {
-  symbol: string;
-  // 可以添加其他需要的信息，如加载状态等
-}
-
-function App() {
-  // 状态管理
-  const [selectedTab, setSelectedTab] = useState<'bitcoin' | 'stockFutures' | 'domesticFutures' | 'trade' | 'orders' | 'strategy'>('bitcoin');
-  const [selectedSymbol, setSelectedSymbol] = useState('BTC/USDT');
-  const [currentPrice, setCurrentPrice] = useState(42500.32);
+const App: React.FC = () => {
+  const [selectedTab, setSelectedTab] = useState<string>('bitcoin');
+  const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC/USDT');
+  const [showTraderPage, setShowTraderPage] = useState<boolean>(false);
+  const [showChartPage, setShowChartPage] = useState<boolean>(false);
+  const [isDirectSymbolClick, setIsDirectSymbolClick] = useState<boolean>(false);
+  const [timeframe, setTimeframe] = useState<string>('1D');
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy');
-  const [orderType, setOrderType] = useState<'limit' | 'market' | 'stop'>('limit');
-  const [orderPrice, setOrderPrice] = useState('');
-  const [orderAmount, setOrderAmount] = useState('');
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [showChartPage, setShowChartPage] = useState(false);
-  const [showTraderPage, setShowTraderPage] = useState(false);
-  const [timeframe, setTimeframe] = useState<string>('15m');
-  const [showHistoryOrders, setShowHistoryOrders] = useState(false);
-  const [isDirectSymbolClick, setIsDirectSymbolClick] = useState(false);
+  const [orderAmount, setOrderAmount] = useState<string>('');
+  const [orderPrice, setOrderPrice] = useState<string>('');
+  const [orderType, setOrderType] = useState<'market' | 'limit'>('limit');
+  const [marketData, setMarketData] = useState<MarketItem[]>([]);
   
-  // 添加导航钩子
   const navigate = useNavigate();
   
-  // 存储所有打开的tabs
-  const [tabs, setTabs] = useState<TabItem[]>([]);
-  // 当前激活的tab
-  const [activeTab, setActiveTab] = useState<string>('');
-
-  // 模拟数据
-  const marketData: MarketItem[] = [
-    { id: 1, symbol: 'BTC/USDT', price: 42500.32, change: 2.45, volume: 1250.67 },
-    { id: 2, symbol: 'ETH/USDT', price: 2250.67, change: -1.23, volume: 3200.45 },
-    { id: 3, symbol: 'SOL/USDT', price: 120.45, change: 5.67, volume: 8500.23 },
-    { id: 4, symbol: 'ADA/USDT', price: 0.56, change: -0.89, volume: 45000.78 },
-    { id: 5, symbol: 'DOT/USDT', price: 7.89, change: 3.45, volume: 6200.34 },
-  ];
-
-  const openOrders: Order[] = [
-    { id: '1', symbol: 'BTC/USDT', type: 'Limit', price: 42000, amount: 0.02, status: 'Open', timestamp: '12:34:56' },
-    { id: '2', symbol: 'ETH/USDT', type: 'Market', price: 0, amount: 1.5, status: 'Processing', timestamp: '12:33:45' },
-  ];
-
-  const orderHistory: Order[] = [
-    { id: '3', symbol: 'SOL/USDT', type: 'Limit', price: 118.5, amount: 10, status: 'Filled', timestamp: '12:30:23' },
-    { id: '4', symbol: 'BTC/USDT', type: 'Limit', price: 43000, amount: 0.01, status: 'Canceled', timestamp: '12:25:12' },
-  ];
-
-  const assetsData: Asset[] = [
-    { id: '1', symbol: 'BTC', balance: 0.5, available: 0.5, frozen: 0 },
-    { id: '6', symbol: 'ETH', balance: 5, available: 4.5, frozen: 0.5 },
-    { id: '7', symbol: 'USDT', balance: 10000, available: 9500, frozen: 500 },
-  ];
-
-  // 价格实时变动模拟
+  // 模拟获取市场数据
   useEffect(() => {
-    const interval = setInterval(() => {
-      const currentSymbolData = marketData.find(item => item.symbol === selectedSymbol);
-      if (currentSymbolData) {
-        const change = (Math.random() - 0.5) * 10;
-        setCurrentPrice(prev => parseFloat((prev + change).toFixed(2)));
-      }
-    }, 3000);
+    const fetchMarketData = () => {
+      // 模拟API请求延迟
+      setTimeout(() => {
+        const mockData: MarketItem[] = [
+          { id: 1, symbol: 'BTC/USDT', price: 42500.32, change: 2.45, volume: 1250.67 },
+          { id: 2, symbol: 'ETH/USDT', price: 2250.67, change: -1.23, volume: 3200.45 },
+          { id: 3, symbol: 'SOL/USDT', price: 120.45, change: 5.67, volume: 8500.23 },
+          { id: 4, symbol: 'ADA/USDT', price: 0.56, change: -0.89, volume: 45000.78 },
+          { id: 5, symbol: 'DOT/USDT', price: 7.89, change: 3.45, volume: 6200.34 },
+        ];
+        setMarketData(mockData);
+      }, 500);
+    };
+
+    fetchMarketData();
+    
+    // 定期更新市场数据
+    const interval = setInterval(fetchMarketData, 3000);
 
     return () => clearInterval(interval);
   }, [selectedSymbol, marketData]);
-
-  // 初始化时添加默认tab
-  useEffect(() => {
-    if (tabs.length === 0 && selectedSymbol) {
-      setTabs([{ symbol: selectedSymbol }]);
-      setActiveTab(selectedSymbol);
-    }
-  }, []);
 
   // 下单处理函数
   const handlePlaceOrder = (e: React.FormEvent) => {
@@ -122,49 +79,21 @@ function App() {
     }
   };
 
-  // 添加新的tab
-  const addTab = (symbol: string) => {
-    if (!tabs.some(tab => tab.symbol === symbol)) {
-      // 如果当前合约不存在，则添加新tab
-      setTabs(prevTabs => [...prevTabs, { symbol }]);
-    }
-    setActiveTab(symbol);
-    setSelectedSymbol(symbol);
-  };
-
-  // 切换tab
-  const handleTabClick = (symbol: string) => {
-    setActiveTab(symbol);
-    setSelectedSymbol(symbol);
-  };
-
-  // 关闭tab
-  const handleTabClose = (symbolToClose: string) => {
-    if (tabs.length <= 1) return; // 至少保留一个tab
-    
-    const newTabs = tabs.filter(tab => tab.symbol !== symbolToClose);
-    setTabs(newTabs);
-    
-    // 如果关闭的是当前激活的tab，则激活第一个tab
-    if (activeTab === symbolToClose) {
-      setActiveTab(newTabs[0].symbol);
-      setSelectedSymbol(newTabs[0].symbol);
-    }
-  };
-
   // 行情点击事件
   const handleSymbolClick = (symbol: string) => {
-    addTab(symbol);
+    setSelectedSymbol(symbol);
     setIsDirectSymbolClick(true); // 标记为直接点击合约
-    // 如果已经在TraderPage中，不需要额外操作
-    // 如果不在TraderPage中，保持当前页面
+    
+    // 导航到对应的交易页面
+    const encodedSymbol = symbol.replace('/', '%2F');
+    navigate(`/trade/${encodedSymbol}`);
   };
 
   // 跳转到交易页面
   const goToTraderPage = (symbol: string) => {
-    addTab(symbol);
-    setShowTraderPage(true);
+    setSelectedSymbol(symbol);
     setIsDirectSymbolClick(true); // 标记为直接点击合约
+    navigate('/trade');
   };
 
   // 返回市场页面
@@ -172,7 +101,6 @@ function App() {
     setShowTraderPage(false);
     setShowChartPage(false);
     setIsDirectSymbolClick(false); // 重置标记
-    // 注意：这里不再清除tab状态，保持tab状态持久化
   };
 
   return (
@@ -323,6 +251,6 @@ function App() {
       )}
     </div>
   );
-}
+};
 
 export default App;

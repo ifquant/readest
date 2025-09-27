@@ -5,6 +5,8 @@ import MarketPage from './MarketPage';
 import TradePages from './TradePages';
 import ChartPage from './ChartPage';
 import Trader from './Trader';
+import { useTabContext } from './context/TabContext';
+import { KeepAlive } from 'react-activation';
 
 // 定义数据接口
 interface MarketItem {
@@ -32,15 +34,12 @@ interface TabItem {
 
 // 交易页面的布局组件
 const TradeLayout: React.FC = () => {
-  // 状态管理
-  const [selectedSymbol, setSelectedSymbol] = useState('BTC/USDT');
-  // 存储所有打开的tabs
-  const [tabs, setTabs] = useState<TabItem[]>([]);
-  // 当前激活的tab
-  const [activeTab, setActiveTab] = useState<string>('');
+  // 使用全局TabContext管理tabs状态
+  const { tabs, activeTab, selectedSymbol, addTab, handleTabClick, handleTabClose } = useTabContext();
   
   // 获取URL参数
   const params = useParams<{ symbol?: string }>();
+  const navigate = useNavigate();
 
   // 模拟数据
   const marketData: MarketItem[] = [
@@ -51,56 +50,67 @@ const TradeLayout: React.FC = () => {
     { id: 5, symbol: 'DOT/USDT', price: 7.89, change: 3.45, volume: 6200.34 },
   ];
 
-  // 初始化时添加默认tab
+  // 使用单一的状态同步effect，避免循环
   useEffect(() => {
-    let defaultSymbol = selectedSymbol;
+    // 只在初始化或从外部导航来时处理URL参数
+    if (params.symbol) {
+      const decodedSymbol = decodeURIComponent(params.symbol);
+      
+      // 检查是否需要更新状态
+      const shouldUpdateState = tabs.length === 0 || 
+                               !tabs.some(tab => tab.symbol === decodedSymbol) ||
+                               decodedSymbol !== activeTab;
+      
+      if (shouldUpdateState) {
+        // 避免在用户主动点击标签页时触发循环
+        if (!tabs.some(tab => tab.symbol === decodedSymbol)) {
+          // 这是一个新的symbol，添加tab
+          addTab(decodedSymbol);
+        } else if (decodedSymbol !== activeTab) {
+          // symbol已存在但不是当前激活的，直接切换
+          handleTabClick(decodedSymbol);
+        }
+      }
+    } else if (tabs.length > 0 && activeTab) {
+      // 如果URL没有参数但有activeTab，在初始化时更新URL一次
+      const encodedSymbol = activeTab.replace('/', '%2F');
+      navigate(`/trade/${encodedSymbol}`, { replace: true });
+    } else if (tabs.length === 0) {
+      // 如果没有任何标签页，添加默认标签页
+      addTab('BTC/USDT');
+    }
     
-    // 如果URL中有symbol参数，使用该参数并进行解码
-    if (params.symbol && params.symbol !== selectedSymbol) {
-      defaultSymbol = decodeURIComponent(params.symbol);
+    // 重要：移除activeTab和isNavigating作为依赖，避免循环触发
+  }, [params.symbol, tabs.length, tabs, addTab]); // 只依赖必要的参数
+
+  // 这个effect只用于初始化，不参与循环
+  useEffect(() => {
+    // 确保在没有URL参数但有activeTab时，URL保持同步
+    if (activeTab && params.symbol) {
+      const decodedSymbol = decodeURIComponent(params.symbol);
+      if (decodedSymbol !== activeTab) {
+        // 但不在这里执行导航，而是在用户交互时处理
+        console.log('URL和activeTab不同步，但避免自动导航以防止循环');
+      }
     }
+  }, [activeTab, params.symbol]);
 
-    if (tabs.length === 0) {
-      setTabs([{ symbol: defaultSymbol }]);
-      setActiveTab(defaultSymbol);
-    }
-  }, [params.symbol, selectedSymbol, tabs.length]);
-
-  // 添加新的tab
-  const addTab = (symbol: string) => {
-    if (!tabs.some(tab => tab.symbol === symbol)) {
-      // 如果当前合约不存在，则添加新tab
-      setTabs(prevTabs => [...prevTabs, { symbol }]);
-    }
-    setActiveTab(symbol);
-    setSelectedSymbol(symbol);
-  };
-
-  // 切换tab
-  const handleTabClick = (symbol: string) => {
-    setActiveTab(symbol);
-    setSelectedSymbol(symbol);
-  };
-
-  // 关闭tab
-  const handleTabClose = (symbolToClose: string) => {
-    if (tabs.length <= 1) return; // 至少保留一个tab
+  // 覆盖默认的handleTabClick，添加防循环逻辑
+  const safeHandleTabClick = (symbol: string) => {
+    // 直接调用原始函数切换标签页
+    handleTabClick(symbol);
     
-    const newTabs = tabs.filter(tab => tab.symbol !== symbolToClose);
-    setTabs(newTabs);
-    
-    // 如果关闭的是当前激活的tab，则激活第一个tab
-    if (activeTab === symbolToClose) {
-      setActiveTab(newTabs[0].symbol);
-      setSelectedSymbol(newTabs[0].symbol);
-    }
+    // 手动更新URL，但不依赖useEffect触发
+    const encodedSymbol = symbol.replace('/', '%2F');
+    navigate(`/trade/${encodedSymbol}`, { replace: true });
   };
 
   return (
     <TradePages 
+      key={activeTab} // 添加key属性，确保activeTab变化时重新渲染
       tabs={tabs}
       activeTab={activeTab}
-      onTabClick={handleTabClick}
+      onTabClick={safeHandleTabClick} // 使用安全的点击处理函数
       onTabClose={handleTabClose}
       onAddTab={addTab}
     />
@@ -120,6 +130,7 @@ const MarketPageWithNavigation: React.FC = () => {
     // 导航到交易页面，并将选择的合约作为URL参数
     // 对包含斜杠的合约符号进行编码
     const encodedSymbol = symbol.replace('/', '%2F');
+    console.log("navigate 111", encodedSymbol)
     navigate(`/trade/${encodedSymbol}`);
   };
   

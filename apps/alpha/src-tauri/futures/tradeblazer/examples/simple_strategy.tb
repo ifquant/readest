@@ -1,0 +1,42 @@
+// 简单的交易策略示例
+
+function OnInit() {
+    Print("策略初始化完成");
+}
+
+function OnTick() {
+    // 获取当前价格
+    var currentPrice = Close;
+    Print("当前价格: ", currentPrice);
+}
+
+function OnBar() {
+    // 获取当前收盘价和前一根K线的收盘价
+    var currentClose = Close;
+    var prevClose = Close[1];
+    
+    Print("当前收盘价: ", currentClose);
+    Print("前一根K线收盘价: ", prevClose);
+    
+    // 简单的交易逻辑：收盘价上涨就买入，下跌就卖出
+    if (currentClose > prevClose) {
+        Print("价格上涨，买入");
+        // Buy(currentClose, 1.0); // 取消注释以执行实际交易
+    } else if (currentClose < prevClose) {
+        Print("价格下跌，卖出");
+        // Sell(currentClose, 1.0); // 取消注释以执行实际交易
+    }
+}
+
+// 自定义函数示例
+function CalculateMA(period) {
+    var sum = 0.0;
+    for (var i = 0; i < period; i++) {
+        sum = sum + Close[i];
+    }
+    return sum / period;
+}
+
+// 策略主逻辑
+var strategyName = "简单趋势跟踪策略";
+Print("加载策略: ", strategyName);
