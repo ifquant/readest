@@ -1,0 +1,196 @@
+---
+id: helper-utilities-reference
+title: Helper 工具函数速查
+sidebar_position: 90
+---
+
+项目内部的工具函数分散在 `src/helpers` 目录中，负责断言、环境检测、绘图帮助、类型约束等通用能力。本文集中列出常用函数及示例，方便新成员在开发过程中复用这些基础能力。
+
+## 算法与查找
+
+**文件**：`src/helpers/algorithms.ts`
+
+- `lowerBound` / `upperBound`：对有序数组执行二分查找，返回值适合作为插入位置或切片边界。
+
+```ts
+import { lowerBound, upperBound } from "../helpers/algorithms";
+
+const points = [10, 20, 30, 40];
+const insertPos = lowerBound(points, 25, (item, value) => item < value); // => 2
+const rightMost = upperBound(points, 30, (item, value) => item <= value); // => 3
+
+points.splice(insertPos, 0, 25);
+```
+
+## 断言与非空校验
+
+**文件**：`src/helpers/assertions.ts`
+
+- `assert(condition, message?)`：运行时断言。
+- `ensureDefined` / `ensureNotNull` / `ensure`：在运行时与类型系统中同时保证值存在。
+- `ensureNever`：用于覆盖 `switch` 的兜底分支，确保编译期校验。
+
+```ts
+import { assert, ensure, ensureNever } from "../helpers/assertions";
+
+type Shape =
+	| { type: "line"; points: number[] }
+	| { type: "candlestick"; open: number; close: number };
+
+export function draw(shape: Shape): void {
+	switch (shape.type) {
+		case "line": {
+			assert(shape.points.length >= 2, "line requires at least two points");
+			break;
+		}
+		case "candlestick": {
+			const close = ensure(shape.close);
+			console.log(close);
+			break;
+		}
+		default:
+			ensureNever(shape);
+	}
+}
+```
+
+## Canvas 绘图辅助
+
+**文件**：`src/helpers/canvas-helpers.ts`
+
+- `fillRectInnerBorder`：在矩形内部绘制边框，避免双重填色。
+- `drawRoundRect` / `drawRoundRectWithBorder`：绘制圆角矩形（兼容老浏览器）。
+- `clearRect` / `clearRectWithGradient`：利用 `globalCompositeOperation = 'copy'` 做区域清除。
+
+```ts
+import { drawRoundRectWithBorder } from "../helpers/canvas-helpers";
+
+const ctx = canvas.getContext("2d")!;
+drawRoundRectWithBorder(
+	ctx,
+	10,
+	10,
+	120,
+	48,
+	"#1f78d1",
+	2,
+	[6, 6, 6, 6],
+	"#0c4a91"
+);
+```
+
+## 浏览器与环境检测
+
+**文件**：`src/helpers/browsers.ts`, `src/helpers/is-running-on-client-side.ts`
+
+- `isRunningOnClientSide`：在 SSR/Node 环境中返回 `false`。
+- `isFF` / `isIOS` / `isChrome` / `isWindows` / `isChromiumBased`：基于 UA 或 `userAgentData` 的精简检测。
+
+```ts
+import { isRunningOnClientSide } from "../helpers/is-running-on-client-side";
+import { isIOS } from "../helpers/browsers";
+
+if (isRunningOnClientSide && isIOS()) {
+	// 准备触控特有的交互逻辑
+}
+```
+
+## 事件委托与订阅
+
+**文件**：`src/helpers/delegate.ts`, `src/helpers/isubscription.ts`, `src/helpers/events.ts`
+
+- `Delegate`：轻量事件总线，支持一次性订阅和批量解绑。
+- `Callback` / `ISubscription`：统一的订阅接口签名。
+- `preventScrollByWheelClick`：阻止 Chrome 中键触发的自动滚动。
+
+```ts
+import { Delegate } from "../helpers/delegate";
+
+interface CrosshairMoveParams {
+	price: number;
+	time: number;
+}
+
+const crosshairMove = new Delegate<CrosshairMoveParams, void, void>();
+
+function handler(params: CrosshairMoveParams): void {
+	console.log("cursor moved to", params);
+}
+
+crosshairMove.subscribe(handler);
+// ...在需要广播时：
+crosshairMove.fire({ price: 42, time: Date.now() }, undefined, undefined);
+crosshairMove.unsubscribe(handler);
+```
+
+> `Delegate` 的泛型占位为三个参数，未使用的参数可保持 `void` 并在调用 `fire` 时显式传入 `undefined`。
+
+```ts
+import { preventScrollByWheelClick } from "../helpers/events";
+
+preventScrollByWheelClick(document.querySelector(".chart-container")!);
+```
+
+## 类型工具
+
+**文件**：`src/helpers/mutable.ts`, `src/helpers/nominal.ts`
+
+- `Mutable<T>`：去除所有属性的 `readonly`。
+- `Nominal<T, Name>`：为基础类型添加品牌约束，避免误用。
+
+```ts
+import type { Mutable } from "../helpers/mutable";
+import type { Nominal } from "../helpers/nominal";
+
+type LogicalIndex = Nominal<number, "LogicalIndex">;
+
+interface SeriesState {
+	readonly id: string;
+	readonly data: number[];
+}
+
+const mutableState: Mutable<SeriesState> = { id: "line", data: [] };
+let index: LogicalIndex = 10 as LogicalIndex;
+```
+
+## 值处理与拷贝
+
+**文件**：`src/helpers/strict-type-checks.ts`
+
+- `merge`：安全地递归合并对象，跳过 `undefined` 与原型关键字。
+- `isNumber` / `isInteger` / `isString` / `isBoolean`：常用类型守卫。
+- `clone`：简单深拷贝，支持对象与数组。
+- `notNull` / `undefinedIfNull`：处理可空值的辅助函数。
+
+```ts
+import { merge, isNumber, notNull } from "../helpers/strict-type-checks";
+
+const options = merge(
+	{ layout: { background: { color: "#fff" } } },
+	{ layout: { textColor: "#333" } }
+);
+
+function parseValues(values: Array<number | null>): number[] {
+	return values.filter(notNull).filter(isNumber);
+}
+```
+
+## 字体与数学
+
+**文件**：`src/helpers/make-font.ts`, `src/helpers/mathex.ts`
+
+- `defaultFontFamily` / `makeFont`：构造 Canvas 所需的 font 字符串。
+- `clamp` / `greaterOrEqual` / `equal` 等函数：统一的浮点比较与取整策略。
+
+```ts
+import { makeFont } from "../helpers/make-font";
+import { clamp, ceiledEven } from "../helpers/mathex";
+
+ctx.font = makeFont(12, "'IBM Plex Sans', sans-serif", "bold");
+const safeOpacity = clamp(rawOpacity, 0, 1);
+const barWidth = ceiledEven(devicePixelRatio * desiredWidth);
+```
+
+---
+
+> 📌 **提示**：如果新增模块需要类似能力，优先复用这些 helper；如需调整，请同步更新本文档，保持文档与实现一致。

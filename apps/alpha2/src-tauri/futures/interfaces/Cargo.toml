@@ -1,0 +1,13 @@
+[package]
+name = "futures-interfaces"
+version = "0.1.0"
+edition = "2021"
+description = "跨模块接口定义：行情、交易、策略等"
+
+[lib]
+name = "futures_interfaces"
+crate-type = ["rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "1"

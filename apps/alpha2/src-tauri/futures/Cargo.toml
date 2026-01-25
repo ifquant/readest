@@ -1,0 +1,8 @@
+[workspace]
+members = [
+  "ctp-client",
+  "strategy-engine",
+  "futurectp",
+  "interfaces",
+  "core"
+]

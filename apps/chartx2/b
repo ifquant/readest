@@ -1,0 +1,5 @@
+Next Suggestions
+
+Run pnpm install (or your package manager of choice) inside chartx/, then pnpm lint / pnpm test / pnpm storybook to verify the toolchain.
+Start replacing the placeholders with real render/model logic (canvas contexts, scale math, series abstractions) and define concrete interfaces for multi-series support.
+Design the indicator runtime contract and draft how Pine Script integration will interface with the model before expanding into layout/tooling work.

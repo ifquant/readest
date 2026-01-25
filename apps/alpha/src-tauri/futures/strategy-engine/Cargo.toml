@@ -1,0 +1,14 @@
+[package]
+name = "strategy-engine"
+version = "0.1.0"
+edition = "2021"
+description = "期货策略引擎（示例）"
+
+[lib]
+name = "strategy_engine"
+crate-type = ["rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "1"
+futures-interfaces = { path = "../interfaces" }

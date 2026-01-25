@@ -1,0 +1,7 @@
+Replaced the ad-hoc TypedEvent with a reusable delegate-style event bus and wired it through the core layers.
+
+chartx/src/helpers/index.ts:1 now exports a Delegate plus a generic EventBus that supports singleshot listeners, linked-object cleanup, and channel-based dispatch.
+chartx/src/model/index.ts:1 emits option updates via EventBus<'options', …> and clears listeners on dispose.
+chartx/src/gui/index.ts:1 uses the same bus pattern to broadcast interaction changes.
+Updated docs/develop.md:1 to log the refactor.
+pnpm lint and pnpm test still pass (see latest runs).

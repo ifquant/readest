@@ -1,0 +1,27 @@
+**总体流程**
+- 入口 `run_script_with_options` 提供“源码→Token→AST→语义→解释执行”标准管线，并在需要时落盘/加载 AST（`src/lib.rs:57-100`）。
+- CLI 包装器只负责解析 `--ast`、`--force-compile` 参数，读入脚本文本后直接交给库层执行（`src/main.rs:4-41`）。
+- 解释器初始化时注册内置函数、加载全局变量/函数定义，然后依次触发 `OnInit`、`OnBar`、`OnTick` 事件（`src/lib.rs:102-137` 与 `src/interpreter.rs:129-409`）。
+- 当前示例流程会推送三根模拟 Bar 和一个 Tick，方便单体调试，但真实环境需替换为外部行情驱动（`src/lib.rs:111-137`）。
+
+**模块拆解**
+- **lib**：聚合编译/执行流程、AST 序列化，并对外暴露 `Lexer`、`Parser`、`Interpreter` 等基础组件（`src/lib.rs:4-140`）。
+- **main**：提供简单 CLI，校验参数后调用库函数，无额外逻辑或并发处理（`src/main.rs:4-41`）。
+- **lexer**：基于 `Peekable<Chars>` 扫描源码，支持块/行注释、科学计数法、位置追踪，最终产出 Token+位置信息（`src/lexer.rs:62-355`）。
+- **parser**：采用 precedence climbing 解析表达式，并将 `i++`、`obj.prop`、`series[idx]` 等语法糖降低成专用 AST 节点（`AssignIntrinsic`、`PropertyAccess`、`IndexAccess` 等），避免运行期再做字符串分派（`src/parser.rs:128-512`）。
+- **semantic**：记录顶层符号，执行作用域检查、禁止嵌套函数/局部 series，并允许内置函数、伪函数白名单通过（`src/semantic.rs:29-245`、`src/semantic.rs:282-332`）。
+- **interpreter**：维护作用域栈、引用别名、行情上下文，负责表达式求值、内置函数/交易指令、事件回调与用户函数调用（`src/interpreter.rs:66-1094`）。
+
+**独特设计**
+- 解释器直接匹配 `IndexAccess`/`MethodCall`/`AssignIntrinsic` 等 AST 节点，避免过去依赖伪函数字符串的二次派发开销，同时保留对旧版本 AST 的兼容路径（`src/interpreter.rs:800-910`、`src/interpreter.rs:1378-1508`）。
+- 解释器使用 `variables`/`references` 双栈维护作用域和值引用，实现 `var &`、`series &` 这种按引用传参而不与 Rust 借用规则冲突（`src/interpreter.rs:67-215`）。
+- 函数体用 `Arc<[Statement]>` 持有，事件驱动和递归场景只增加引用计数，避免巨大 `Vec` 的重复克隆（`src/interpreter.rs:86-91`、`src/interpreter.rs:365-407`）。
+- 行情上下文基于 `VecDeque` 限制缓存长度，Tick 与 Bar 数据共享统一读取接口，简化指标函数实现（`src/interpreter.rs:93-124`、`src/interpreter.rs:955-986`）。
+
+**潜在风险**
+- 布尔运算总是先求完两侧再组合，`&&`/`||` 缺乏短路，可能导致副作用函数被误执行或性能开销过大（`src/interpreter.rs:588-706`）。
+- 语义层允许 `Alert`、`Comment` 等内置函数，但解释器并未注册，运行期会报“未实现的内置函数”错误（`src/semantic.rs:283-320` 对比 `src/interpreter.rs:148-188`）。
+- 指标白名单涵盖 MA、EMA 等高级指标，而运行期只支持 OHLCV，调用这些名称会在执行阶段报错（`src/semantic.rs:324-331` 与 `src/interpreter.rs:955-964`）。
+- `run_script_with_options` 默认推送固定模拟行情，若集成到实际环境需显式移除，否则可能重复触发策略或污染回测数据（`src/lib.rs:111-137`）。
+
+如需进一步熟悉，可考虑编写一个最小策略脚本并走通 CLI 执行流程，以验证对事件生命周期和引用传参的理解。

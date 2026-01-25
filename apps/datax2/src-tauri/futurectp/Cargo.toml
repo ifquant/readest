@@ -1,0 +1,28 @@
+
+[package]
+name = "tauri-plugin-futurectp"
+version = "0.1.0"
+edition = "2021"
+description = "Tauri v2 plugin: futurectp"
+build = "build.rs"
+links = "tauri-plugin-futurectp"
+
+[lib]
+name = "tauri_plugin_futurectp"
+crate-type = ["rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json.workspace = true
+tauri = { version = "2.8.2", default-features = false }
+tauri-build = "2.4"
+tauri-plugin = "2.4"
+tauri-utils = "2.7"
+
+
+[build-dependencies]
+tauri-plugin = { version = "2.4", features = ["build"]}
+
+[features]
+default = ["ctp_v6_7_11"]
+ctp_v6_7_11 = []

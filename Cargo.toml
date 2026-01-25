@@ -1,7 +1,14 @@
 [workspace]
 members = [
   "apps/readest-app/src-tauri",
+  "apps/jsreader/src-tauri",
   "apps/futureass/src-tauri",
+  "apps/chartx/src-tauri",
+  "apps/chartx2/src-tauri",
+  "apps/romars/src-tauri",
+  "apps/romars2/src-tauri",
+  "apps/datax2/src-tauri/futurectp",
+  "apps/br1/src-tauri",
   "apps/optionhelper/src-tauri",
   "packages/tauri/crates/tauri",
   "apps/alpha/src-tauri",

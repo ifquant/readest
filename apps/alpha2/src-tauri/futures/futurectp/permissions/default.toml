@@ -1,0 +1,8 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Default permissions for futurectp plugin"
+permissions = ["allow-ping"]
+
+
+
