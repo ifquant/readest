@@ -16,10 +16,10 @@ overrides:
 
 patchedDependencies:
   '@ai-sdk/provider-utils@4.0.8':
-    hash: c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e
+    hash: dmdsutwxxvgw73w3ul3n3xraui
     path: patches/@ai-sdk__provider-utils@4.0.8.patch
   mdast-util-gfm-autolink-literal@2.0.1:
-    hash: a119b196bac546b8f07e1a9600ced6f526b0676e2b959914868e393ecffbaff8
+    hash: u4s5dc56prnsiawurnuwnb3pri
     path: patches/mdast-util-gfm-autolink-literal@2.0.1.patch
 
 importers:
@@ -10108,18 +10108,18 @@ snapshots:
   '@ai-sdk/gateway@2.0.29(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 2.0.1
-      '@ai-sdk/provider-utils': 4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)
       '@vercel/oidc': 3.1.0
       zod: 4.3.6
 
   '@ai-sdk/gateway@3.0.22(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.5
-      '@ai-sdk/provider-utils': 4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)
       '@vercel/oidc': 3.1.0
       zod: 4.3.6
 
-  '@ai-sdk/provider-utils@4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)':
+  '@ai-sdk/provider-utils@4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.4
       '@standard-schema/spec': 1.1.0
@@ -10140,7 +10140,7 @@ snapshots:
 
   '@ai-sdk/react@2.0.125(react@19.2.0)(zod@4.3.6)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)
       ai: 5.0.123(zod@4.3.6)
       react: 19.2.0
       swr: 2.3.8(react@19.2.0)
@@ -10150,7 +10150,7 @@ snapshots:
 
   '@ai-sdk/react@3.0.51(react@19.2.0)(zod@4.3.6)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)
       ai: 6.0.49(zod@4.3.6)
       react: 19.2.0
       swr: 2.3.8(react@19.2.0)
@@ -15324,7 +15324,7 @@ snapshots:
   ai-sdk-ollama@3.3.0(ai@6.0.49(zod@4.3.6))(zod@4.3.6):
     dependencies:
       '@ai-sdk/provider': 3.0.5
-      '@ai-sdk/provider-utils': 4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)
       ai: 6.0.49(zod@4.3.6)
       ollama: 0.6.3
     transitivePeerDependencies:
@@ -15334,7 +15334,7 @@ snapshots:
     dependencies:
       '@ai-sdk/gateway': 2.0.29(zod@4.3.6)
       '@ai-sdk/provider': 2.0.1
-      '@ai-sdk/provider-utils': 4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
       zod: 4.3.6
 
@@ -15342,7 +15342,7 @@ snapshots:
     dependencies:
       '@ai-sdk/gateway': 3.0.22(zod@4.3.6)
       '@ai-sdk/provider': 3.0.5
-      '@ai-sdk/provider-utils': 4.0.8(patch_hash=c3995b156b800cc8c981771d26b6d62a5dd870939257c6c1bf3b593bc9d5eb9e)(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.8(patch_hash=dmdsutwxxvgw73w3ul3n3xraui)(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
       zod: 4.3.6
 
@@ -17930,7 +17930,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm-autolink-literal@2.0.1(patch_hash=a119b196bac546b8f07e1a9600ced6f526b0676e2b959914868e393ecffbaff8):
+  mdast-util-gfm-autolink-literal@2.0.1(patch_hash=u4s5dc56prnsiawurnuwnb3pri):
     dependencies:
       '@types/mdast': 4.0.4
       ccount: 2.0.1
@@ -17978,7 +17978,7 @@ snapshots:
   mdast-util-gfm@3.1.0:
     dependencies:
       mdast-util-from-markdown: 2.0.2
-      mdast-util-gfm-autolink-literal: 2.0.1(patch_hash=a119b196bac546b8f07e1a9600ced6f526b0676e2b959914868e393ecffbaff8)
+      mdast-util-gfm-autolink-literal: 2.0.1(patch_hash=u4s5dc56prnsiawurnuwnb3pri)
       mdast-util-gfm-footnote: 2.1.0
       mdast-util-gfm-strikethrough: 2.0.0
       mdast-util-gfm-table: 2.0.0
